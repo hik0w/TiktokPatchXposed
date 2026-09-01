@@ -2,7 +2,7 @@
 
 LSPosed-модуль с набором исправлений и дополнительных функций для TikTok.
 
-Текущая версия модуля: **3.11** (`com.golda.patchertiktok`). Работа проверена с TikTok **46.7.3** (`com.zhiliaoapp.musically`).
+Текущая версия модуля: **3.12** (`com.golda.patchertiktok`). Работа проверена с TikTok **46.7.3** (`com.zhiliaoapp.musically`).
 
 ## Возможности
 
@@ -11,7 +11,7 @@ LSPosed-модуль с набором исправлений и дополни�
 - Скачивание видео без водяного знака.
 - Скрытие рекламы в ленте и при запуске TikTok, включая TopView, псевдорекламу и рекламу, добавленную после загрузки страницы.
 - Фильтрация LIVE-трансляций и скрытие кнопки LIVE в левом верхнем углу.
-- Постоянно доступная полоса перемотки для обычных видео, включая короткие ролики.
+- Постоянно доступная полоса перемотки для обычных видео, включая короткие ролики и переходы между роликами.
 - Скрытие видео с серверной пометкой «Ваши вероятные знакомые» без отключения обычных новых рекомендаций.
 - Исправление входа через Google на основе идеи патча ReVanced для TikTok.
 - Автопродление только уже существующих огоньков, вошедших в период риска `SECONDARY_ACTIVE`. Обычным диалогам и активным огонькам системное сообщение не отправляется.
@@ -56,7 +56,7 @@ LSPosed-модуль с набором исправлений и дополни�
 
 An LSPosed module with fixes and additional features for TikTok.
 
-Current module version: **3.11** (`com.golda.patchertiktok`). Verified with TikTok **46.7.3** (`com.zhiliaoapp.musically`).
+Current module version: **3.12** (`com.golda.patchertiktok`). Verified with TikTok **46.7.3** (`com.zhiliaoapp.musically`).
 
 ### Features
 
@@ -65,7 +65,7 @@ Current module version: **3.11** (`com.golda.patchertiktok`). Verified with TikT
 - Download videos without a watermark.
 - Startup and in-feed ad filtering, including TopView, pseudo-ad markers and ads inserted after a page is loaded.
 - LIVE feed filtering and removal of the top-left LIVE button.
-- An always-available seekbar for normal videos, including short clips.
+- An always-available seekbar for normal videos, including short clips and feed transitions.
 - Filtering for videos marked as "People you may know" without disabling ordinary fresh recommendations.
 - Google Auth Fix based on the ReVanced TikTok Google login patch idea.
 - Auto streak renewal only for existing streaks that entered TikTok's at-risk `SECONDARY_ACTIVE` window. Normal conversations and healthy active streaks are skipped.

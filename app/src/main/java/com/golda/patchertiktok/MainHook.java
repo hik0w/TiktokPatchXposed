@@ -31,6 +31,8 @@ public class MainHook implements IXposedHookLoadPackage {
             "com.golda.patchertiktok.cleaned_feed_snapshot";
     private static final String RENDERED_AD_SKIPPED_KEY =
             "com.golda.patchertiktok.rendered_ad_skipped";
+    private static final String SEEKBAR_ELIGIBILITY_KEY =
+            "com.golda.patchertiktok.seekbar_eligible";
     private static final String RECOMMENDATION_FEED_PATH = "/aweme/v2/feed/";
     private static final String LEGACY_RECOMMENDATION_FEED_PATH = "/aweme/v1/feed/";
     private static final String[] SUGGESTION_SIGNAL_METHOD_NAMES = {
@@ -64,6 +66,21 @@ public class MainHook implements IXposedHookLoadPackage {
     private static final String CONTENT_LANGUAGE = "ru";
     private static final Locale APP_LOCALE = new Locale("ru", "RU");
     private static final String APP_LOCALE_TAG = "ru-RU";
+
+    private static final String AWEME_CLASS =
+            "com.ss.android.ugc.aweme.feed.model.Aweme";
+    private static final String[] SEEKBAR_CONTROLLER_CANDIDATES = {
+            "X.06XH",
+            "X.1BSr"
+    };
+    private static final String[] SEEKBAR_VIEW_CANDIDATES = {
+            "X.06W4",
+            "X.17kt"
+    };
+    private static final String[] SEEKBAR_SHOULD_SHOW_METHOD_CANDIDATES = {
+            "LJII",
+            "LIZLLL"
+    };
 
     private static final String[] AUTO_STREAK_RECEIVER_CANDIDATES = {
             "com.ss.android.ugc.aweme.keepalive.KeepAliveReceiver",
@@ -114,11 +131,37 @@ public class MainHook implements IXposedHookLoadPackage {
     }
 
     private void installSeekbarPatch(ClassLoader classLoader) {
-        try {
-            Class<?> controller = XposedHelpers.findClassIfExists("X.06XH", classLoader);
-            if (controller != null) {
+        Class<?> awemeClass = XposedHelpers.findClassIfExists(AWEME_CLASS, classLoader);
+        int shouldShowHooks = 0;
+        int shortVideoHooks = 0;
+        int showTypeHooks = 0;
+        int legacyHooks = 0;
+
+        for (String className : SEEKBAR_CONTROLLER_CANDIDATES) {
+            try {
+                Class<?> controller = XposedHelpers.findClassIfExists(className, classLoader);
+                if (controller == null) continue;
+
                 for (Method method : controller.getDeclaredMethods()) {
                     Class<?>[] parameters = method.getParameterTypes();
+                    if (awemeClass != null
+                            && isNamed(method, SEEKBAR_SHOULD_SHOW_METHOD_CANDIDATES)
+                            && method.getReturnType() == boolean.class
+                            && parameters.length == 1
+                            && parameters[0] == awemeClass) {
+                        XposedBridge.hookMethod(method, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) {
+                                if (Boolean.TRUE.equals(param.getResult())) return;
+                                if (param.args.length > 0
+                                        && shouldForceSeekbarForAweme(param.args[0])) {
+                                    param.setResult(true);
+                                }
+                            }
+                        });
+                        shouldShowHooks++;
+                    }
+
                     if ("LJIIL".equals(method.getName())
                             && method.getReturnType() == int.class
                             && parameters.length == 1
@@ -127,10 +170,56 @@ public class MainHook implements IXposedHookLoadPackage {
                                 method,
                                 XC_MethodReplacement.returnConstant(0)
                         );
+                        shortVideoHooks++;
                     }
                 }
+            } catch (Throwable t) {
+                XposedBridge.log(TAG + " [seekbar controller " + className + "] " + t);
             }
+        }
 
+        List<Class<?>> seekbarViewClasses = new ArrayList<>();
+        for (String className : SEEKBAR_VIEW_CANDIDATES) {
+            addClassIfMissing(
+                    seekbarViewClasses,
+                    XposedHelpers.findClassIfExists(className, classLoader)
+            );
+        }
+        discoverSeekbarViewClasses(classLoader, seekbarViewClasses);
+
+        List<Method> hookedShowTypeMethods = new ArrayList<>();
+        for (Class<?> seekbarViewClass : seekbarViewClasses) {
+            for (Method method : seekbarViewClass.getDeclaredMethods()) {
+                Class<?>[] parameters = method.getParameterTypes();
+                if (!"setSeekBarShowType".equals(method.getName())
+                        || method.getReturnType() != void.class
+                        || parameters.length != 1
+                        || parameters[0] != int.class
+                        || hookedShowTypeMethods.contains(method)) {
+                    continue;
+                }
+
+                try {
+                    XposedBridge.hookMethod(method, new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) {
+                            if (param.args.length == 0 || !(param.args[0] instanceof Number)) {
+                                return;
+                            }
+                            int requestedType = ((Number) param.args[0]).intValue();
+                            param.args[0] = SeekbarPolicy.normalizeShowType(requestedType);
+                        }
+                    });
+                    hookedShowTypeMethods.add(method);
+                    showTypeHooks++;
+                } catch (Throwable t) {
+                    XposedBridge.log(TAG + " [seekbar show type "
+                            + seekbarViewClass.getName() + "] " + t);
+                }
+            }
+        }
+
+        try {
             Class<?> legacyManager = XposedHelpers.findClassIfExists(
                     "com.ss.android.ugc.aweme.player.sdk.api.SeekBarManager",
                     classLoader
@@ -141,9 +230,96 @@ public class MainHook implements IXposedHookLoadPackage {
                         "shouldShowSeekBar",
                         XC_MethodReplacement.returnConstant(true)
                 );
+                legacyHooks++;
             }
         } catch (Throwable t) {
-            XposedBridge.log(TAG + " [seekbar] " + t);
+            XposedBridge.log(TAG + " [legacy seekbar] " + t);
+        }
+
+        XposedBridge.log(TAG + ": seekbar patch installed; shouldShow=" + shouldShowHooks
+                + " showType=" + showTypeHooks
+                + " shortVideo=" + shortVideoHooks
+                + " legacy=" + legacyHooks);
+    }
+
+    private boolean isNamed(Method method, String[] candidates) {
+        for (String candidate : candidates) {
+            if (candidate.equals(method.getName())) return true;
+        }
+        return false;
+    }
+
+    private void addClassIfMissing(List<Class<?>> classes, Class<?> candidate) {
+        if (candidate != null && !classes.contains(candidate)) {
+            classes.add(candidate);
+        }
+    }
+
+    private void discoverSeekbarViewClasses(
+            ClassLoader classLoader,
+            List<Class<?>> seekbarViewClasses
+    ) {
+        try {
+            Class<?> mainPageSeekAssem = XposedHelpers.findClassIfExists(
+                    "com.bytedance.tiktok.homepage.mainpagefragment.assem.MainPageSeekAssem",
+                    classLoader
+            );
+            if (mainPageSeekAssem == null) return;
+
+            for (Field field : mainPageSeekAssem.getDeclaredFields()) {
+                Class<?> fieldType = field.getType();
+                for (Method method : fieldType.getDeclaredMethods()) {
+                    Class<?>[] parameters = method.getParameterTypes();
+                    if ("setSeekBarShowType".equals(method.getName())
+                            && method.getReturnType() == void.class
+                            && parameters.length == 1
+                            && parameters[0] == int.class) {
+                        addClassIfMissing(seekbarViewClasses, fieldType);
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            XposedBridge.log(TAG + " [seekbar view discovery] " + t);
+        }
+    }
+
+    private boolean shouldForceSeekbarForAweme(Object aweme) {
+        if (aweme == null) return false;
+
+        try {
+            Object cached = XposedHelpers.getAdditionalInstanceField(
+                    aweme,
+                    SEEKBAR_ELIGIBILITY_KEY
+            );
+            if (cached instanceof Boolean) return (Boolean) cached;
+
+            boolean hasVideo = XposedHelpers.callMethod(aweme, "getVideo") != null;
+            boolean isAd = Boolean.TRUE.equals(XposedHelpers.callMethod(aweme, "isAd"))
+                    || XposedHelpers.callMethod(aweme, "getAwemeRawAd") != null;
+            int awemeType = ((Number) XposedHelpers.callMethod(
+                    aweme,
+                    "getAwemeType"
+            )).intValue();
+            boolean isLive = awemeType == 101;
+            boolean isPhoto = awemeType == 150
+                    || XposedHelpers.callMethod(aweme, "getPhotoModeImageInfo") != null
+                    || XposedHelpers.callMethod(aweme, "getPhotoModeTextInfo") != null;
+            boolean eligible = SeekbarPolicy.shouldForceShow(
+                    false,
+                    hasVideo,
+                    isAd,
+                    isLive,
+                    isPhoto
+            );
+            XposedHelpers.setAdditionalInstanceField(
+                    aweme,
+                    SEEKBAR_ELIGIBILITY_KEY,
+                    eligible
+            );
+            return eligible;
+        } catch (Throwable ignored) {
+            return false;
         }
     }
 
