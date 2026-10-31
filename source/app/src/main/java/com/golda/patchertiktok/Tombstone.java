@@ -39,21 +39,25 @@ final class Tombstone {
         int[] signal = null;
         List<String> causes = new ArrayList<>();
         List<int[]> threads = new ArrayList<>();
-        while (top.more()) {
-            int key = (int) top.varint();
-            int field = key >>> 3, wire = key & 7;
-            if (field == 6 && wire == 0) tid = top.varint();
-            else if (field == 10 && wire == 2) signal = top.range();
-            else if (field == 14 && wire == 2) abort = top.string();
-            else if (field == 15 && wire == 2) {
-                Reader cause = top.sub();
-                while (cause.more()) {
-                    int k = (int) cause.varint();
-                    if (k >>> 3 == 1 && (k & 7) == 2) causes.add(cause.string());
-                    else cause.skip(k & 7);
-                }
-            } else if (field == 16 && wire == 2) threads.add(top.range());
-            else top.skip(wire);
+        try {
+            while (top.more()) {
+                int key = (int) top.varint();
+                int field = key >>> 3, wire = key & 7;
+                if (field == 6 && wire == 0) tid = top.varint();
+                else if (field == 10 && wire == 2) signal = top.range();
+                else if (field == 14 && wire == 2) abort = top.string();
+                else if (field == 15 && wire == 2) {
+                    Reader cause = top.sub();
+                    while (cause.more()) {
+                        int k = (int) cause.varint();
+                        if (k >>> 3 == 1 && (k & 7) == 2) causes.add(cause.string());
+                        else cause.skip(k & 7);
+                    }
+                } else if (field == 16 && wire == 2) threads.add(top.range());
+                else top.skip(wire);
+            }
+        } catch (IllegalStateException cutOff) {
+            // A record larger than the buffer ends mid-field; everything before it still counts.
         }
         StringBuilder out = new StringBuilder();
         if (signal != null) signal(new Reader(data, signal[0], signal[1]), out);

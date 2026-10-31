@@ -2130,18 +2130,10 @@ public final class ModSettingsActivity extends Activity {
             }
             PICTURE_CACHE.put(id, bytes);
             try {
-                int limit = dp(72);
-                android.graphics.drawable.Drawable picture = android.graphics.ImageDecoder.decodeDrawable(
-                        android.graphics.ImageDecoder.createSource(java.nio.ByteBuffer.wrap(bytes)),
-                        (decoder, info, source) -> {
-                            int width = info.getSize().getWidth();
-                            int height = info.getSize().getHeight();
-                            float scale = Math.min(1f, (float) limit / Math.max(width, height));
-                            decoder.setTargetSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
-                        });
+                android.graphics.drawable.Drawable picture = Build.VERSION.SDK_INT >= 28 ? decoded(bytes, dp(72)) : still(bytes);
                 runOnUiThread(() -> {
                     view.setImageDrawable(picture);
-                    if (picture instanceof android.graphics.drawable.AnimatedImageDrawable) {
+                    if (Build.VERSION.SDK_INT >= 28 && picture instanceof android.graphics.drawable.AnimatedImageDrawable) {
                         ((android.graphics.drawable.AnimatedImageDrawable) picture).start();
                     }
                 });
@@ -2150,6 +2142,25 @@ public final class ModSettingsActivity extends Activity {
                 file.delete();
             }
         }));
+    }
+
+    @android.annotation.TargetApi(28)
+    private static android.graphics.drawable.Drawable decoded(byte[] bytes, int limit) throws java.io.IOException {
+        return android.graphics.ImageDecoder.decodeDrawable(
+                android.graphics.ImageDecoder.createSource(java.nio.ByteBuffer.wrap(bytes)),
+                (decoder, info, source) -> {
+                    int width = info.getSize().getWidth();
+                    int height = info.getSize().getHeight();
+                    float scale = Math.min(1f, (float) limit / Math.max(width, height));
+                    decoder.setTargetSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
+                });
+    }
+
+    /** Android 8.1 has no ImageDecoder: a plain picture, the first frame of an animated one. */
+    private android.graphics.drawable.Drawable still(byte[] bytes) throws java.io.IOException {
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        if (bitmap == null) throw new java.io.IOException("not a picture");
+        return new android.graphics.drawable.BitmapDrawable(getResources(), bitmap);
     }
 
     private byte[] fetch(java.util.List<String> urls) {

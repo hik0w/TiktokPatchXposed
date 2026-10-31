@@ -50,6 +50,16 @@ final class SettingsEntry {
 
     /** Swaps in {@link ModSettingsActivity} when TikTok's settings activity is started with our extra. */
     static void installHost() {
+        // With TikTok already running, LSPosed's settings button reaches its open activity here.
+        Hooks.hookAll(Instrumentation.class, "callActivityOnNewIntent", new Hooks.Hook() {
+            @Override protected void before(Hooks.Call param) {
+                if (param.args.length < 2 || !(param.args[1] instanceof Intent)) return;
+                Intent intent = (Intent) param.args[1];
+                if (!intent.getBooleanExtra(OPEN_EXTRA, false)) return;
+                intent.removeExtra(OPEN_EXTRA);
+                openPending = true;
+            }
+        });
         Hooks.hookAll(Instrumentation.class, "newActivity", new Hooks.Hook() {
             @Override protected void before(Hooks.Call param) {
                 if (param.args.length != 3 || !(param.args[2] instanceof Intent)) return;

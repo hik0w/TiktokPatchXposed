@@ -47,19 +47,28 @@ final class AvatarDownload {
         if (owner == null || photo == null) return;
         Object person = owner;
         View.OnLongClickListener save = view -> {
-            DownloadModels.Item item = null;
-            for (String getter : new String[]{"getAvatarLarger", "getAvatarMedium", "getAvatarThumb"}) {
-                item = DownloadModels.picture(Reflect.call(person, getter));
-                if (item != null) break;
+            try {
+                return saveAvatar(activity, person, view);
+            } catch (Throwable error) {
+                Safe.log("avatar download", error);
+                return false;
             }
-            if (item == null) return false;
-            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            Object id = Reflect.call(person, "getUid");
-            DownloadsPlus.save(activity, "avatar_" + id, Collections.singletonList(item));
-            return true;
         };
         // The picture inside the avatar view takes the touches, so every level of it listens.
         listen(photo, save, 0);
+    }
+
+    private static boolean saveAvatar(Activity activity, Object person, View view) {
+        DownloadModels.Item item = null;
+        for (String getter : new String[]{"getAvatarLarger", "getAvatarMedium", "getAvatarThumb"}) {
+            item = DownloadModels.picture(Reflect.call(person, getter));
+            if (item != null) break;
+        }
+        if (item == null) return false;
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        Object id = Reflect.call(person, "getUid");
+        DownloadsPlus.save(activity, "avatar_" + id, Collections.singletonList(item));
+        return true;
     }
 
     private static void listen(View view, View.OnLongClickListener save, int depth) {

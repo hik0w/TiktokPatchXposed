@@ -189,9 +189,10 @@ final class MessageTime {
             if (target == null) return;
             int left = target.getLeft();
             int right = target.getRight();
-            for (View parent = (View) target.getParent(); parent != null && parent != row; parent = (View) parent.getParent()) {
-                left += parent.getLeft();
-                right += parent.getLeft();
+            // The top of a view tree is not a View, and a bubble moved out of the row ends there.
+            for (android.view.ViewParent parent = target.getParent(); parent instanceof View && parent != row; parent = parent.getParent()) {
+                left += ((View) parent).getLeft();
+                right += ((View) parent).getLeft();
             }
             // Your messages sit on the right half; the time follows the bubble's outer edge.
             boolean mine = left + right > row.getWidth();

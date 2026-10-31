@@ -114,6 +114,45 @@ public class TombstoneTest {
         assertFalse(text, text.contains("0000007a"));
     }
 
+    @Test public void aRecordCutOffByTheBufferStillGivesTheCrash() {
+        Proto head = new Proto().varint(6, 7)
+                .message(10, new Proto().varint(1, 11).string(2, "SIGSEGV").string(4, "SEGV_MAPERR"))
+                .message(16, entry(7, thread(7, "RenderThread", frame(0x10, "draw", 4, "/system/lib64/libhwui.so"))));
+        byte[] data = head.message(17, new Proto().bytes(1, new byte[4096])).build();
+        // The buffer ended inside the memory map that follows the threads.
+        String text = Tombstone.read(data, data.length - 1000);
+        assertTrue(text, text.contains("crashed thread: RenderThread (7)"));
+        assertTrue(text, text.contains("libhwui.so (draw+4)"));
+    }
+
+    @Test public void aRecordCutBeforeTheThreadKeepsTheSignal() {
+        byte[] data = new Proto().varint(6, 7)
+                .message(10, new Proto().varint(1, 11).string(2, "SIGSEGV"))
+                .message(16, entry(7, thread(7, "main", frame(0x10, "f", 0, "libc.so")))).build();
+        String text = Tombstone.read(data, data.length - 5);
+        assertTrue(text, text.contains("signal SIGSEGV"));
+        assertTrue(text, text.contains("crashing thread not in the record"));
+    }
+
+    @Test public void randomDataNeverThrows() {
+        java.util.Random random = new java.util.Random(11);
+        byte[] good = new Proto().varint(6, 7)
+                .message(10, new Proto().varint(1, 11).string(2, "SIGSEGV").varint(8, 1).varint(9, 24))
+                .message(15, new Proto().string(1, "cause"))
+                .message(16, entry(7, thread(7, "main", frame(0x10, "f", 0, "libc.so"), frame(0x20, null, 0, "libart.so")))).build();
+        for (int round = 0; round < 200_000; round++) {
+            byte[] data = good.clone();
+            for (int flips = 1 + random.nextInt(6); flips > 0; flips--) data[random.nextInt(data.length)] = (byte) random.nextInt(256);
+            Tombstone.read(data, 1 + random.nextInt(data.length));
+        }
+        for (int round = 0; round < 50_000; round++) {
+            byte[] data = new byte[random.nextInt(300) + 1];
+            random.nextBytes(data);
+            if (round % 2 == 0) System.arraycopy("*** ***".getBytes(StandardCharsets.US_ASCII), 0, data, 0, Math.min(7, data.length));
+            Tombstone.read(data, data.length);
+        }
+    }
+
     @Test public void rejectsData() {
         byte[] junk = {(byte) 0xff, (byte) 0xff, (byte) 0xff};
         assertNull(Tombstone.read(junk, junk.length));

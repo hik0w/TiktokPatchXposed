@@ -126,7 +126,10 @@ final class UnsentMessages {
         if (!(ext instanceof Map)) return false;
         Map<?, ?> values = (Map<?, ?>) ext;
         boolean recalled = "1".equals(values.get(FLAG)) || "true".equals(values.get("s:recalled"));
-        if (!recalled && !KEPT.isEmpty()) recalled = KEPT.contains(Reflect.call(message, "getUuid"));
+        if (!recalled && !KEPT.isEmpty()) {
+            Object uuid = Reflect.call(message, "getUuid");
+            recalled = uuid != null && KEPT.contains(uuid);
+        }
         return recalled && kept(message);
     }
 

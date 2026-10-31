@@ -62,6 +62,7 @@ final class AuthorRegion {
             });
             hooks++;
         }
+        RuntimeLog.log("author region: hooks=" + hooks);
     }
 
     private static boolean profileWanted() {
