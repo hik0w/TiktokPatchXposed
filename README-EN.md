@@ -7,7 +7,7 @@ turns on features TikTok rolls out only to some people, and adds many small thin
 everywhere, your own color, font and AMOLED theme, hiding parts of the screen, country flags,
 invisible mode and auto streaks. All settings live right inside TikTok.
 
-Current version: **4.4.3**. Tested on **TikTok 47.4.3** and **47.1.4** (Google Play and universal APK),
+Current version: **4.4.4**. Tested on **TikTok 47.5.3**, **47.4.3** and **47.1.4** (Google Play and universal APK),
 **Android 16**. Most features find what they need in TikTok by themselves, so
 they survive TikTok updates.
 
@@ -52,7 +52,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **Hide paid content and products**, **hide AI videos**.
 - **Only fresh videos**: hides recommendations older than the chosen period.
 - **Hide videos I've seen**: the module remembers what you watched and leaves it out when TikTok sends it again.
-- **Own filter**: by words, hashtags, authors, minimum likes and views.
+- **Own filter**: by words, hashtags, authors, countries, minimum likes and views.
 
 ### Playback
 - **Auto-scroll everywhere**: in search, following and chats; profiles and liked videos have their own switch in the
@@ -99,7 +99,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **Clean links** (no tracking), **links in your browser**, **screenshots everywhere**.
 
 ### Privacy
-- 🧪 **Invisible mode**: not showing up in story and highlight views (separate switches), profile and video views.
+- 🧪 **Invisible mode**: not showing up in story and highlight views (a separate 🧪 switch), profile and video views. On your phone the story still counts as watched.
 - **In chats:** hide "typing…", 🧪 "online" and 🧪 "Read" (with "Mark as read" in a message's menu
   and "Read" when you reply).
 - 🧪 **Block location**, 🧪 **hide VPN**, 🧪 **random device ID**, 🧪 **hide root**,

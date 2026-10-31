@@ -81,6 +81,8 @@ final class Prefs {
     static final String CUSTOM_FILTER = "custom_filter";
     static final String FILTER_WORDS = "filter_words";
     static final String FILTER_AUTHORS = "filter_authors";
+    /** Comma-separated ISO codes of countries whose authors the own filter hides. */
+    static final String FILTER_COUNTRIES = "filter_countries";
     static final String FILTER_MIN_LIKES = "filter_min_likes";
     static final String FILTER_MIN_VIEWS = "filter_min_views";
     static final String REMEMBER_CLEAN = "remember_clean_screen";
@@ -284,7 +286,7 @@ final class Prefs {
         }
         region = Regions.normalize(loaded.getString(REGION, DEFAULT_REGION));
         oldVideoDays = Math.max(1, loaded.getInt(OLD_VIDEO_DAYS, DEFAULT_OLD_VIDEO_DAYS));
-        for (String key : new String[]{FILTER_WORDS, FILTER_AUTHORS, SPEEDS, TRANSLATE_EXCLUDE, STREAK_STICKER,
+        for (String key : new String[]{FILTER_WORDS, FILTER_AUTHORS, FILTER_COUNTRIES, SPEEDS, TRANSLATE_EXCLUDE, STREAK_STICKER,
                 STREAK_STICKER_TITLE, STREAK_STICKER_URL, STREAK_EXCLUDED, ANDROID_ID, FONT_SOURCE, FONT_FILE, FEED_REGION}) TEXTS.put(key, loaded.getString(key, ""));
         for (String key : new String[]{FILTER_MIN_LIKES, FILTER_MIN_VIEWS}) NUMBERS.put(key, loaded.getLong(key, 0));
         NUMBERS.put(ACCENT_COLOR, loaded.getLong(ACCENT_COLOR, DEFAULT_ACCENT));
@@ -298,7 +300,7 @@ final class Prefs {
     }
 
     /** Text strings, numbers and the region, besides the switches in {@link #DEFAULTS}. */
-    private static final String[] TEXT_KEYS = {REGION, FILTER_WORDS, FILTER_AUTHORS, SPEEDS, TRANSLATE_EXCLUDE,
+    private static final String[] TEXT_KEYS = {REGION, FILTER_WORDS, FILTER_AUTHORS, FILTER_COUNTRIES, SPEEDS, TRANSLATE_EXCLUDE,
             STREAK_STICKER, STREAK_STICKER_TITLE, STREAK_STICKER_URL, STREAK_EXCLUDED, FEED_REGION};
     private static final String[] LONG_KEYS = {FILTER_MIN_LIKES, FILTER_MIN_VIEWS, ACCENT_COLOR, OVERLAY_OPACITY, REFRESH_RATE, HD_BITRATE, STREAK_TIME, QUALITY_WIFI, QUALITY_MOBILE};
 
@@ -446,7 +448,7 @@ final class Prefs {
 
     private static void rebuildRules() {
         rules = FilterRules.parse(text(FILTER_WORDS), text(FILTER_AUTHORS),
-                number(FILTER_MIN_LIKES), number(FILTER_MIN_VIEWS));
+                number(FILTER_MIN_LIKES), number(FILTER_MIN_VIEWS), text(FILTER_COUNTRIES));
     }
 
     static String snapshot() {

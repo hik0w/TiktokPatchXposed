@@ -2197,6 +2197,16 @@ public final class ModSettingsActivity extends Activity {
         textField(page.card(), Prefs.FILTER_WORDS, I18n.get(S.FILTER_WORDS_HINT));
         page.section(I18n.get(S.FILTER_AUTHORS));
         textField(page.card(), Prefs.FILTER_AUTHORS, I18n.get(S.FILTER_AUTHORS_HINT));
+        page.section(I18n.get(S.FILTER_COUNTRIES_SECTION));
+        TextView count = navigation(page.card(), I18n.get(S.FILTER_COUNTRIES), null, view -> push(countriesPage(), true));
+        LinearLayout flags = new LinearLayout(this);
+        flags.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout countryRow = (LinearLayout) count.getParent();
+        countryRow.addView(flags, countryRow.indexOfChild(count), new LinearLayout.LayoutParams(-2, -2));
+        Runnable sync = () -> showHiddenCountries(flags, count);
+        sync.run();
+        page.root.setTag(sync);
+        page.footer(I18n.get(S.FILTER_COUNTRIES_FOOTER));
         page.section(I18n.get(S.FILTER_MIN));
         LinearLayout minimum = page.card();
         numberRow(minimum, I18n.get(S.FILTER_MIN_LIKES), Prefs.FILTER_MIN_LIKES);
@@ -2316,9 +2326,8 @@ public final class ModSettingsActivity extends Activity {
         return regionPage(S.REGION, Prefs.region(), true, Prefs::setRegion);
     }
 
-    /** The country list; {@code withOff} adds "Off" on top. */
-    private View regionPage(S title, String selected, boolean withOff, java.util.function.Consumer<String> select) {
-        Page page = new Page(I18n.get(title), false);
+    /** The search box on top of a country list. */
+    private EditText searchField(Page page) {
         LinearLayout searchBox = new LinearLayout(this);
         searchBox.setGravity(Gravity.CENTER_VERTICAL);
         searchBox.setPadding(dp(12), 0, dp(12), 0);
@@ -2340,6 +2349,83 @@ public final class ModSettingsActivity extends Activity {
         LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(-1, dp(40));
         boxParams.setMargins(dp(16), dp(8), dp(16), dp(12));
         page.content.addView(searchBox, boxParams);
+        return search;
+    }
+
+    /** The countries the own filter hides, as saved. */
+    private static java.util.Set<String> hiddenCountries() {
+        java.util.Set<String> codes = new java.util.LinkedHashSet<>();
+        for (String code : Prefs.text(Prefs.FILTER_COUNTRIES).split(",")) {
+            if (!code.trim().isEmpty()) codes.add(code.trim().toLowerCase(Locale.ROOT));
+        }
+        return codes;
+    }
+
+    /** Countries to hide: any number can be ticked, so the page stays open; ticked ones come first. */
+    private View countriesPage() {
+        Page page = new Page(I18n.get(S.FILTER_COUNTRIES), false);
+        EditText search = searchField(page);
+        LinearLayout list = page.card();
+        java.util.Set<String> chosen = hiddenCountries();
+        List<Regions.Region> regions = new ArrayList<>(Regions.sorted(locale));
+        java.util.Collections.sort(regions, (a, b) -> Boolean.compare(chosen.contains(b.iso), chosen.contains(a.iso)));
+        List<View> rows = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        for (Regions.Region region : regions) {
+            String name = region.name(locale);
+            LinearLayout row = row(list);
+            row.setMinimumHeight(dp(52));
+            texts(row, name, null);
+            ImageView check = new ImageView(this);
+            check.setImageDrawable(new Glyph(Glyph.Kind.CHECK, palette.accent, dp(22)));
+            check.setVisibility(chosen.contains(region.iso) ? View.VISIBLE : View.INVISIBLE);
+            row.addView(check, new LinearLayout.LayoutParams(dp(22), dp(22)));
+            row.setOnClickListener(Safe.click("settings", view -> {
+                boolean on = !chosen.remove(region.iso);
+                if (on) chosen.add(region.iso);
+                check.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
+                Prefs.setText(Prefs.FILTER_COUNTRIES, TextUtils.join(",", chosen));
+            }));
+            String flag = RegionFlag.of(region.iso);
+            if (flag != null) leadingIcon(row, new FlagDot(flag, dp(22)));
+            rows.add(row);
+            names.add(name.toLowerCase(locale) + " " + region.iso + " " + region.name(Locale.ENGLISH).toLowerCase(Locale.ROOT));
+        }
+        search.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override public void afterTextChanged(Editable s) {
+                String query = s.toString().trim().toLowerCase(locale);
+                for (int index = 0; index < rows.size(); index++) {
+                    rows.get(index).setVisibility(names.get(index).contains(query) ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+        return page.root;
+    }
+
+    /** The first flags and the number of hidden countries, or "Off". */
+    private void showHiddenCountries(LinearLayout flags, TextView count) {
+        java.util.Set<String> chosen = hiddenCountries();
+        count.setText(chosen.isEmpty() ? I18n.get(S.OFF) : String.valueOf(chosen.size()));
+        flags.removeAllViews();
+        int shown = 0;
+        for (String iso : chosen) {
+            String flag = RegionFlag.of(iso);
+            if (flag == null) continue;
+            ImageView view = new ImageView(this);
+            view.setImageDrawable(new FlagDot(flag, dp(18)));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(18), dp(18));
+            if (shown > 0) params.setMarginStart(-dp(5));
+            flags.addView(view, params);
+            if (++shown == 3) break;
+        }
+    }
+
+    /** The country list; {@code withOff} adds "Off" on top. */
+    private View regionPage(S title, String selected, boolean withOff, java.util.function.Consumer<String> select) {
+        Page page = new Page(I18n.get(title), false);
+        EditText search = searchField(page);
 
         LinearLayout list = page.card();
         List<View> rows = new ArrayList<>();

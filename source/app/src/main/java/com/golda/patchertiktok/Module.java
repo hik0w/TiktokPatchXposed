@@ -98,6 +98,7 @@ final class Module {
         run("code index", () -> Discovery.init(app));
         run("friend card", () -> FeedFilter.installCardInsertion(loader));
         run("seen videos", () -> SeenVideos.install(app, loader));
+        run("stories seen", () -> StoriesSeen.install(app, loader));
         run("unmute", () -> Unmute.install(loader));
         run("hd upload", () -> HdUpload.install(loader));
         run("read receipts", () -> ReadReceipts.install(loader));
