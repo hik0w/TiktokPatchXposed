@@ -63,6 +63,10 @@ final class ResumePosition {
             });
             hooks++;
         }
+        Foreground.listen(() -> {
+            MAIN.removeCallbacks(SAMPLE);
+            MAIN.postDelayed(SAMPLE, 1_000L);
+        });
         RuntimeLog.log("resume position: hooks=" + hooks);
     }
 
@@ -102,7 +106,7 @@ final class ResumePosition {
         private void step() {
             Object feedPanel = panel.get();
             String id = playing;
-            if (feedPanel == null || id == null || !Prefs.on(Prefs.RESUME_POSITION)) return;
+            if (feedPanel == null || id == null || !Prefs.on(Prefs.RESUME_POSITION) || !Foreground.shown()) return;
             Object aweme = invoke(currentAweme, feedPanel);
             if (aweme == null || !id.equals(string(Reflect.get(aweme, "aid")))) return;
             Object position = Reflect.call(invoke(playerAbility, feedPanel), "getCurrentPosition");

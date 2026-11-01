@@ -36,6 +36,7 @@ final class Module {
             run("comment media", () -> CommentMedia.install(loader));
             run("external browser", () -> ExternalLinks.install(loader));
             run("interface", () -> InterfaceTweaks.install(loader));
+            run("comment limit", () -> CommentLimit.install(loader));
             run("overlay", () -> Overlay.install(loader));
             run("author region", () -> AuthorRegion.install(loader));
             run("LIVE button", () -> LiveButton.install(loader));
@@ -140,6 +141,7 @@ final class Module {
         run("A/B overrides", () -> AbOverrides.install(loader));
         run("startup ads", () -> StartupAds.install(loader));
         run("seekbar", () -> Seekbar.install(loader));
+        run("foreground", () -> Foreground.install(app));
         run("settings row", () -> SettingsEntry.install(app, loader));
         run("auto streaks", () -> AutoStreakManager.install(app, loader));
         run("code index release", Discovery::release);

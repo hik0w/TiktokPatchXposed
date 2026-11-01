@@ -102,6 +102,7 @@ final class Overlay {
             refresh();
             schedule();
         })));
+        Foreground.listen(Overlay::schedule);
         RuntimeLog.log("overlay installed");
     }
 
@@ -350,7 +351,7 @@ final class Overlay {
         }
 
         private void step() {
-            if (!Prefs.on(Prefs.BURN_IN)) return;
+            if (!Prefs.on(Prefs.BURN_IN) || !Foreground.shown()) return;
             long now = SystemClock.uptimeMillis();
             if (!dimmed && dims() && now - lastTouch > IDLE_MS) {
                 dimmed = true;

@@ -484,6 +484,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.NEW_PROFILE, S.NEW_PROFILE_DESC, Prefs.NEW_PROFILE),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.ACCOUNT_DATE, S.ACCOUNT_DATE_DESC, Prefs.ACCOUNT_DATE),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.HIDE_INBOX_STORIES, S.HIDE_INBOX_STORIES_DESC, Prefs.HIDE_INBOX_STORIES),
+            new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.HIDE_INBOX_SUGGESTED, S.HIDE_INBOX_SUGGESTED_DESC, Prefs.HIDE_INBOX_SUGGESTED),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.MESSAGE_TIME, S.MESSAGE_TIME_DESC, Prefs.MESSAGE_TIME),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.READ_ALL, S.READ_ALL_DESC, Prefs.READ_ALL),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.KEEP_UNSENT, S.KEEP_UNSENT_DESC, Prefs.KEEP_UNSENT),
@@ -494,6 +495,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SOCIAL, null, S.COMMENT_PHOTOS, S.COMMENT_PHOTOS_DESC, Prefs.COMMENT_PHOTOS),
             new Setting(Category.SOCIAL, null, S.AUTHOR_REGION, S.AUTHOR_REGION_DESC, Prefs.AUTHOR_REGION),
             new Setting(Category.SOCIAL, null, S.COMMENT_HANDLE, S.COMMENT_HANDLE_DESC, Prefs.COMMENT_HANDLE),
+            new Setting(Category.SOCIAL, null, S.COMMENT_NO_LIMIT, S.COMMENT_NO_LIMIT_DESC, Prefs.COMMENT_NO_LIMIT),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.NO_WATERMARK, null, Prefs.NO_WATERMARK),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.DOWNLOAD_ANY, S.DOWNLOAD_ANY_DESC, Prefs.DOWNLOAD_ANY),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.QUALITY_PICKER, S.QUALITY_PICKER_DESC, Prefs.QUALITY_PICKER),
@@ -735,7 +737,7 @@ public final class ModSettingsActivity extends Activity {
             {"resume position", "RESUME_POSITION"}, {"playback speed", "REMEMBER_SPEED"}, {"downloads plus", "QUALITY_PICKER"}, {"auto-scroll", "AUTO_SCROLL"}, {"comment media", "COMMENT_MEDIA"},
             {"comment copy", "COPY_COMMENT"}, {"external browser", "EXTERNAL_BROWSER"},
             {"interface", "HIDE_INBOX_STORIES"}, {"overlay", "OVERLAY_OPACITY"}, {"accent color", "ACCENT"},
-            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
+            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"comment limit", "COMMENT_NO_LIMIT"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
             {"invisible mode", "SECTION_GHOST"}, {"region", "REGION"}, {"recommendation", "REGION_LANGUAGE"},
             {"A/B overrides", "EXTRA_FEATURES"}, {"auto streaks", "AUTO_STREAK"}, {"streak sticker", "STREAK_STICKER"},
             {"friend card", "ACQUAINTANCES"}, {"unmute", "UNMUTE"}, {"font", "FONT"}, {"privacy", "SECTION_PRIVACY"},
@@ -2684,7 +2686,7 @@ public final class ModSettingsActivity extends Activity {
             Prefs.UNMUTE, Prefs.SELF_REPOST, Prefs.HD_UPLOAD, Prefs.GHOST_ONLINE, Prefs.GHOST_READ,
             Prefs.COMMENT_PHOTOS, Prefs.NO_HASHTAG_LIMIT, Prefs.CAMERA_EXTRAS, Prefs.HIDE_ROOT, Prefs.PIP_FEED,
             Prefs.PREFER_H264, Prefs.PHOTO_BEST, Prefs.NO_MOTION_SENSORS, Prefs.NO_TIKTOK_ANALYTICS, Prefs.UPLOAD_ORIGINAL,
-            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD};
+            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT};
 
     /**
      * A small mark after a row's title: an outlined "Beta" for settings under test, a plain

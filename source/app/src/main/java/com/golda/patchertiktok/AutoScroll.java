@@ -89,6 +89,10 @@ final class AutoScroll {
                 }
             });
         }
+        Foreground.listen(() -> {
+            MAIN.removeCallbacks(TICK);
+            MAIN.postDelayed(TICK, TICK_MS);
+        });
     }
 
     /**
@@ -439,7 +443,7 @@ final class AutoScroll {
         private void step() {
             Object feedPanel = panel.get();
             String id = playing;
-            if (feedPanel == null || id == null || !Prefs.on(key(feedPanel))) return;
+            if (feedPanel == null || id == null || !Prefs.on(key(feedPanel)) || !Foreground.shown()) return;
             Object aweme = invoke(currentAweme, feedPanel);
             if (aweme == null || !id.equals(string(Reflect.get(aweme, "aid")))) return;
             Object value = Reflect.call(invoke(playerAbility, feedPanel), "getCurrentPosition");

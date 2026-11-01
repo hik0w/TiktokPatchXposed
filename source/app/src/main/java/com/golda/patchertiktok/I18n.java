@@ -75,7 +75,8 @@ final class I18n {
         RESET_ALL, RESET_CONFIRM, RESET_CONFIRM_TEXT, RESET_DONE, KEEP_UNSENT, KEEP_UNSENT_DESC, UNSENT_MARK, NO_DOUBLE_TAP_LIKE, NO_DOUBLE_TAP_LIKE_DESC, ACCOUNT_DATE, ACCOUNT_DATE_DESC, ACCOUNT_CREATED,
         GHOST_HIGHLIGHTS, GHOST_HIGHLIGHTS_DESC,
         LIVE_RECORD, LIVE_RECORD_DESC, LIVE_REC_TITLE, LIVE_REC_PICK, LIVE_REC_COPY, LIVE_REC_COPY_DESC, LIVE_REC_NONE, LIVE_REC_STARTED, LIVE_REC_SAVED, LIVE_REC_FAILED, LIVE_REC_COPIED,
-        FILTER_COUNTRIES_SECTION, FILTER_COUNTRIES, FILTER_COUNTRIES_FOOTER
+        FILTER_COUNTRIES_SECTION, FILTER_COUNTRIES, FILTER_COUNTRIES_FOOTER,
+        COMMENT_NO_LIMIT, COMMENT_NO_LIMIT_DESC, HIDE_INBOX_SUGGESTED, HIDE_INBOX_SUGGESTED_DESC
     }
 
     private static final Map<String, String[]> TABLES = new HashMap<>();
@@ -132,7 +133,9 @@ final class I18n {
                 "Reset all settings", "Reset all settings?", "Every switch, filter, region and color goes back to its default. Export the settings first to keep a copy.", "Settings reset", "Keep unsent messages", "When someone unsends a chat message, it stays on your phone marked “Unsent”. Only messages your phone already received can be kept", "Unsent", "No like on double tap", "Double-tapping a video no longer likes it; the heart button still does", "Account creation date", "On profiles, the exact date and time the account was made, under the name. Very old musical.ly accounts don't have one", "Created %s",
                 "Hide highlight views", "Authors won't see you among the viewers of their profile highlights",
                 "Record LIVEs", "A REC button in LIVE rooms records the stream in the quality you choose into Movies/TikTok (MP4), or copies its link", "Record this LIVE", "Choose a quality", "Copy stream link", "Best quality, to open in a player like VLC", "No stream found yet. Wait for the LIVE to start playing, then tap REC again", "Recording started. Tap ■ to stop", "LIVE recording saved to Movies/TikTok", "Couldn’t record this LIVE", "Stream link copied",
-                "Countries", "Hide countries", "The country TikTok assigned to the account, the one the flag shows; not always where the person lives. Videos without a country stay."});
+                "Countries", "Hide countries", "The country TikTok assigned to the account, the one the flag shows; not always where the person lives. Videos without a country stay.",
+                "No comment length limit", "Write comments longer than TikTok allows. TikTok's server may still refuse a very long one", "Hide suggested people in Inbox", "The block of people TikTok suggests under your chats"
+        });
         TABLES.put("ru", new String[]{
                 "TiktokPatchXposed", "Лента",
                 "Блокировать рекламу", "В ленте, при запуске и в других списках видео",
@@ -184,7 +187,9 @@ final class I18n {
                 "Сбросить все настройки", "Сбросить все настройки?", "Все переключатели, фильтры, регион и цвета вернутся к значениям по умолчанию. Чтобы сохранить копию, сначала экспортируйте настройки.", "Настройки сброшены", "Сохранять удалённые сообщения", "Если собеседник отменит отправку сообщения, оно останется у вас с пометкой «Удалено». Сохраняются только сообщения, которые уже пришли на телефон", "Удалено", "Без лайка двойным касанием", "Двойное касание видео больше не ставит лайк; кнопка с сердцем работает как обычно", "Дата создания аккаунта", "В профилях под именем — точные дата и время создания аккаунта. У очень старых аккаунтов musical.ly её нет", "Создан %s",
                 "Скрыть просмотр подборок", "Автор не увидит вас среди зрителей подборок в своём профиле",
                 "Запись LIVE", "Кнопка REC в эфире записывает трансляцию в выбранном качестве в Movies/TikTok (MP4) или копирует ссылку на поток", "Записать этот LIVE", "Выберите качество", "Копировать ссылку на поток", "Лучшее качество — для плеера вроде VLC", "Поток пока не найден. Дождитесь, пока эфир начнёт воспроизводиться, и снова нажмите REC", "Запись началась. Нажмите ■, чтобы остановить", "Запись эфира сохранена в Movies/TikTok", "Не удалось записать этот эфир", "Ссылка на поток скопирована",
-                "Страны", "Скрывать страны", "Страна, которую TikTok присвоил аккаунту, как у флага. Человек может жить в другом месте. Видео без страны остаются."});
+                "Страны", "Скрывать страны", "Страна, которую TikTok присвоил аккаунту, как у флага. Человек может жить в другом месте. Видео без страны остаются.",
+                "Без лимита длины комментария", "Можно писать комментарии длиннее, чем разрешает TikTok. Сервер TikTok может не принять очень длинный", "Скрыть рекомендации людей во «Входящих»", "Блок людей, которых TikTok предлагает под чатами"
+        });
         TABLES.put("uk", new String[]{
                 "TiktokPatchXposed", "Стрічка",
                 "Блокувати рекламу", "У стрічці, під час запуску та в інших списках відео",
@@ -236,7 +241,9 @@ final class I18n {
                 "Скинути всі налаштування", "Скинути всі налаштування?", "Усі перемикачі, фільтри, регіон і кольори повернуться до типових значень. Щоб зберегти копію, спершу експортуйте налаштування.", "Налаштування скинуто", "Зберігати видалені повідомлення", "Якщо співрозмовник скасує надсилання повідомлення, воно залишиться у вас з позначкою «Видалено». Зберігаються лише повідомлення, які вже надійшли на телефон", "Видалено", "Без лайка подвійним дотиком", "Подвійний дотик до відео більше не ставить лайк; кнопка із серцем працює як звичайно", "Дата створення акаунта", "У профілях під іменем — точні дата й час створення акаунта. Дуже старі акаунти musical.ly її не мають", "Створено %s",
                 "Приховати перегляд добірок", "Автор не побачить вас серед глядачів добірок у своєму профілі",
                 "Запис LIVE", "Кнопка REC в ефірі записує трансляцію у вибраній якості в Movies/TikTok (MP4) або копіює посилання на потік", "Записати цей LIVE", "Виберіть якість", "Копіювати посилання на потік", "Найкраща якість — для плеєра на кшталт VLC", "Потік ще не знайдено. Зачекайте, поки ефір почне відтворюватися, і знову натисніть REC", "Запис почався. Натисніть ■, щоб зупинити", "Запис ефіру збережено в Movies/TikTok", "Не вдалося записати цей ефір", "Посилання на потік скопійовано",
-                "Країни", "Приховувати країни", "Країна, яку TikTok присвоїв акаунту, як у прапорця. Людина може жити деінде. Відео без країни залишаються."});
+                "Країни", "Приховувати країни", "Країна, яку TikTok присвоїв акаунту, як у прапорця. Людина може жити деінде. Відео без країни залишаються.",
+                "Без ліміту довжини коментаря", "Можна писати коментарі довші, ніж дозволяє TikTok. Сервер TikTok може не прийняти дуже довгий", "Сховати рекомендації людей у «Вхідних»", "Блок людей, яких TikTok пропонує під чатами"
+        });
         TABLES.put("de", new String[]{
                 "TiktokPatchXposed", "Feed",
                 "Werbung blockieren", "Im Feed, beim Start und in anderen Videolisten",
@@ -288,7 +295,9 @@ final class I18n {
                 "Alle Einstellungen zurücksetzen", "Alle Einstellungen zurücksetzen?", "Alle Schalter, Filter, die Region und Farben kehren zum Standard zurück. Exportiere die Einstellungen vorher, um eine Kopie zu behalten.", "Einstellungen zurückgesetzt", "Zurückgezogene Nachrichten behalten", "Zieht jemand eine Chatnachricht zurück, bleibt sie bei dir mit „Zurückgezogen“ markiert. Nur Nachrichten, die schon auf deinem Handy angekommen sind", "Zurückgezogen", "Kein Like per Doppeltippen", "Doppeltippen auf ein Video gibt kein Like mehr; das Herz funktioniert wie gewohnt", "Erstellungsdatum des Kontos", "Auf Profilen unter dem Namen: genaues Datum und Uhrzeit, wann das Konto erstellt wurde. Sehr alte musical.ly-Konten haben keins", "Erstellt %s",
                 "Highlight-Aufrufe verbergen", "Der Autor sieht dich nicht unter den Zuschauern seiner Profil-Highlights",
                 "LIVEs aufnehmen", "Eine REC-Taste in LIVE-Räumen nimmt den Stream in der gewählten Qualität in Movies/TikTok auf (MP4) oder kopiert seinen Link", "Dieses LIVE aufnehmen", "Qualität wählen", "Stream-Link kopieren", "Beste Qualität, zum Öffnen in einem Player wie VLC", "Noch kein Stream gefunden. Warte, bis das LIVE abgespielt wird, und tippe dann erneut auf REC", "Aufnahme gestartet. Zum Beenden auf ■ tippen", "LIVE-Aufnahme in Movies/TikTok gespeichert", "Dieses LIVE konnte nicht aufgenommen werden", "Stream-Link kopiert",
-                "Länder", "Länder ausblenden", "Das Land, das TikTok dem Konto zugewiesen hat, wie bei der Flagge. Die Person kann anderswo leben. Videos ohne Land bleiben."});
+                "Länder", "Länder ausblenden", "Das Land, das TikTok dem Konto zugewiesen hat, wie bei der Flagge. Die Person kann anderswo leben. Videos ohne Land bleiben.",
+                "Keine Längenbegrenzung für Kommentare", "Schreibe längere Kommentare, als TikTok erlaubt. TikToks Server kann sehr lange trotzdem ablehnen", "Personenvorschläge im Eingang ausblenden", "Der Block mit Personen, die TikTok unter deinen Chats vorschlägt"
+        });
         TABLES.put("es", new String[]{
                 "TiktokPatchXposed", "Feed",
                 "Bloquear anuncios", "En el feed, al iniciar y en otras listas de vídeos",
@@ -340,7 +349,9 @@ final class I18n {
                 "Restablecer todos los ajustes", "¿Restablecer todos los ajustes?", "Todos los interruptores, filtros, la región y los colores vuelven a sus valores predeterminados. Exporta los ajustes antes si quieres guardar una copia.", "Ajustes restablecidos", "Conservar mensajes anulados", "Si alguien anula el envío de un mensaje en un chat, se queda en tu teléfono marcado como «Anulado». Solo se conservan los mensajes que ya llegaron a tu teléfono", "Anulado", "Sin me gusta con doble toque", "Tocar dos veces un vídeo ya no da me gusta; el botón del corazón funciona como siempre", "Fecha de creación de la cuenta", "En los perfiles, bajo el nombre: la fecha y hora exactas en que se creó la cuenta. Las cuentas muy antiguas de musical.ly no la tienen", "Creada %s",
                 "Ocultar vistas de destacados", "El autor no te verá entre los espectadores de los destacados de su perfil",
                 "Grabar LIVE", "Un botón REC en los LIVE graba la transmisión en la calidad que elijas en Movies/TikTok (MP4) o copia su enlace", "Grabar este LIVE", "Elige una calidad", "Copiar enlace del stream", "Mejor calidad, para abrir en un reproductor como VLC", "Aún no se encontró la transmisión. Espera a que el LIVE empiece a reproducirse y toca REC otra vez", "Grabación iniciada. Toca ■ para detenerla", "Grabación del LIVE guardada en Movies/TikTok", "No se pudo grabar este LIVE", "Enlace del stream copiado",
-                "Países", "Ocultar países", "El país que TikTok asignó a la cuenta, el de la bandera. La persona puede vivir en otro lugar. Los videos sin país se quedan."});
+                "Países", "Ocultar países", "El país que TikTok asignó a la cuenta, el de la bandera. La persona puede vivir en otro lugar. Los videos sin país se quedan.",
+                "Sin límite de longitud en comentarios", "Escribe comentarios más largos de lo que permite TikTok. El servidor de TikTok puede rechazar uno muy largo", "Ocultar personas sugeridas en Bandeja", "El bloque de personas que TikTok sugiere bajo tus chats"
+        });
         TABLES.put("pt", new String[]{
                 "TiktokPatchXposed", "Feed",
                 "Bloquear anúncios", "No feed, ao abrir e em outras listas de vídeos",
@@ -392,7 +403,9 @@ final class I18n {
                 "Redefinir todas as configurações", "Redefinir todas as configurações?", "Todos os interruptores, filtros, a região e as cores voltam ao padrão. Exporte as configurações antes para guardar uma cópia.", "Configurações redefinidas", "Manter mensagens anuladas", "Quando alguém anula o envio de uma mensagem no chat, ela fica no seu telefone marcada como “Anulada”. Só ficam as mensagens que já chegaram ao telefone", "Anulada", "Sem curtida com toque duplo", "Tocar duas vezes no vídeo não curte mais; o botão de coração funciona normalmente", "Data de criação da conta", "Nos perfis, abaixo do nome: data e hora exatas em que a conta foi criada. Contas muito antigas do musical.ly não têm", "Criada %s",
                 "Ocultar visualizações de destaques", "O autor não verá você entre os espectadores dos destaques do perfil",
                 "Gravar LIVEs", "Um botão REC nas LIVEs grava a transmissão na qualidade que você escolher em Movies/TikTok (MP4) ou copia o link", "Gravar esta LIVE", "Escolha a qualidade", "Copiar link da transmissão", "Melhor qualidade, para abrir num player como o VLC", "Nenhuma transmissão encontrada ainda. Espere a LIVE começar a tocar e toque em REC de novo", "Gravação iniciada. Toque em ■ para parar", "Gravação da LIVE salva em Movies/TikTok", "Não foi possível gravar esta LIVE", "Link da transmissão copiado",
-                "Países", "Ocultar países", "O país que o TikTok atribuiu à conta, o da bandeira. A pessoa pode morar em outro lugar. Vídeos sem país continuam."});
+                "Países", "Ocultar países", "O país que o TikTok atribuiu à conta, o da bandeira. A pessoa pode morar em outro lugar. Vídeos sem país continuam.",
+                "Sem limite de tamanho nos comentários", "Escreva comentários maiores do que o TikTok permite. O servidor do TikTok ainda pode recusar um muito longo", "Ocultar pessoas sugeridas na Caixa de entrada", "O bloco de pessoas que o TikTok sugere abaixo das conversas"
+        });
         TABLES.put("fr", new String[]{
                 "TiktokPatchXposed", "Fil",
                 "Bloquer les publicités", "Dans le fil, au démarrage et dans les autres listes de vidéos",
@@ -444,7 +457,9 @@ final class I18n {
                 "Réinitialiser tous les réglages", "Réinitialiser tous les réglages ?", "Tous les interrupteurs, filtres, la région et les couleurs reviennent à leurs valeurs par défaut. Exportez d’abord les réglages pour en garder une copie.", "Réglages réinitialisés", "Garder les messages retirés", "Quand quelqu’un retire un message dans un chat, il reste sur votre téléphone marqué « Retiré ». Seuls les messages déjà reçus sur le téléphone sont gardés", "Retiré", "Pas de j’aime au double appui", "Appuyer deux fois sur une vidéo ne met plus de j’aime ; le bouton cœur fonctionne comme d’habitude", "Date de création du compte", "Sur les profils, sous le nom : la date et l’heure exactes de création du compte. Les très anciens comptes musical.ly ne l’ont pas", "Créé le %s",
                 "Masquer les vues de highlights", "L'auteur ne vous verra pas parmi les spectateurs des highlights de son profil",
                 "Enregistrer les LIVE", "Un bouton REC dans les LIVE enregistre le flux dans la qualité choisie dans Movies/TikTok (MP4) ou copie son lien", "Enregistrer ce LIVE", "Choisissez une qualité", "Copier le lien du flux", "Meilleure qualité, à ouvrir dans un lecteur comme VLC", "Aucun flux trouvé pour l’instant. Attendez que le LIVE démarre, puis touchez REC à nouveau", "Enregistrement lancé. Touchez ■ pour l’arrêter", "Enregistrement du LIVE sauvegardé dans Movies/TikTok", "Impossible d’enregistrer ce LIVE", "Lien du flux copié",
-                "Pays", "Masquer des pays", "Le pays que TikTok a attribué au compte, celui du drapeau. La personne peut vivre ailleurs. Les vidéos sans pays restent."});
+                "Pays", "Masquer des pays", "Le pays que TikTok a attribué au compte, celui du drapeau. La personne peut vivre ailleurs. Les vidéos sans pays restent.",
+                "Pas de limite de longueur des commentaires", "Écrivez des commentaires plus longs que ce que TikTok autorise. Le serveur de TikTok peut refuser un texte très long", "Masquer les personnes suggérées dans la boîte de réception", "Le bloc de personnes que TikTok suggère sous vos discussions"
+        });
         TABLES.put("it", new String[]{
                 "TiktokPatchXposed", "Feed",
                 "Blocca pubblicità", "Nel feed, all'avvio e in altri elenchi di video",
@@ -496,7 +511,9 @@ final class I18n {
                 "Ripristina tutte le impostazioni", "Ripristinare tutte le impostazioni?", "Tutti gli interruttori, i filtri, la regione e i colori tornano ai valori predefiniti. Esporta prima le impostazioni per conservarne una copia.", "Impostazioni ripristinate", "Conserva i messaggi annullati", "Se qualcuno annulla l’invio di un messaggio in chat, resta sul tuo telefono segnato come «Annullato». Restano solo i messaggi già arrivati sul telefono", "Annullato", "Niente Mi piace con doppio tocco", "Toccare due volte un video non mette più Mi piace; il pulsante del cuore funziona come sempre", "Data di creazione dell’account", "Nei profili, sotto il nome: data e ora esatte in cui è stato creato l’account. I vecchissimi account musical.ly non ce l’hanno", "Creato il %s",
                 "Nascondi visualizzazioni delle evidenze", "L'autore non ti vedrà tra gli spettatori delle evidenze del profilo",
                 "Registra i LIVE", "Un pulsante REC nei LIVE registra la diretta nella qualità scelta in Movies/TikTok (MP4) o ne copia il link", "Registra questo LIVE", "Scegli la qualità", "Copia link dello stream", "Qualità migliore, da aprire in un lettore come VLC", "Nessuno stream trovato. Attendi che il LIVE inizi a riprodursi, poi tocca di nuovo REC", "Registrazione avviata. Tocca ■ per fermarla", "Registrazione del LIVE salvata in Movies/TikTok", "Impossibile registrare questo LIVE", "Link dello stream copiato",
-                "Paesi", "Nascondi paesi", "Il paese che TikTok ha assegnato all'account, quello della bandiera. La persona può vivere altrove. I video senza paese restano."});
+                "Paesi", "Nascondi paesi", "Il paese che TikTok ha assegnato all'account, quello della bandiera. La persona può vivere altrove. I video senza paese restano.",
+                "Nessun limite di lunghezza dei commenti", "Scrivi commenti più lunghi di quanto consente TikTok. Il server di TikTok può comunque rifiutarne uno molto lungo", "Nascondi persone suggerite in Posta", "Il blocco di persone che TikTok suggerisce sotto le chat"
+        });
         TABLES.put("pl", new String[]{
                 "TiktokPatchXposed", "Kanał",
                 "Blokuj reklamy", "W kanale, przy uruchamianiu i na innych listach filmów",
@@ -548,7 +565,9 @@ final class I18n {
                 "Przywróć wszystkie ustawienia", "Przywrócić wszystkie ustawienia?", "Wszystkie przełączniki, filtry, region i kolory wrócą do domyślnych. Aby zachować kopię, najpierw wyeksportuj ustawienia.", "Ustawienia przywrócone", "Zachowuj cofnięte wiadomości", "Gdy ktoś cofnie wysłanie wiadomości w czacie, zostanie ona u ciebie z oznaczeniem „Cofnięta”. Zachowywane są tylko wiadomości, które już dotarły na telefon", "Cofnięta", "Bez polubienia podwójnym stuknięciem", "Podwójne stuknięcie w film już go nie polubi; przycisk serca działa jak zwykle", "Data utworzenia konta", "Na profilach pod nazwą: dokładna data i godzina utworzenia konta. Bardzo stare konta musical.ly jej nie mają", "Utworzono %s",
                 "Ukryj wyświetlenia wyróżnień", "Autor nie zobaczy cię wśród widzów wyróżnień w swoim profilu",
                 "Nagrywanie LIVE", "Przycisk REC w transmisjach LIVE nagrywa strumień w wybranej jakości do Movies/TikTok (MP4) albo kopiuje jego link", "Nagraj tę transmisję LIVE", "Wybierz jakość", "Kopiuj link do strumienia", "Najlepsza jakość, do otwarcia w odtwarzaczu takim jak VLC", "Nie znaleziono jeszcze strumienia. Poczekaj, aż LIVE zacznie się odtwarzać, i ponownie dotknij REC", "Nagrywanie rozpoczęte. Dotknij ■, aby zatrzymać", "Nagranie LIVE zapisano w Movies/TikTok", "Nie udało się nagrać tej transmisji LIVE", "Skopiowano link do strumienia",
-                "Kraje", "Ukrywaj kraje", "Kraj przypisany do konta przez TikToka, ten z flagi. Osoba może mieszkać gdzie indziej. Filmy bez kraju zostają."});
+                "Kraje", "Ukrywaj kraje", "Kraj przypisany do konta przez TikToka, ten z flagi. Osoba może mieszkać gdzie indziej. Filmy bez kraju zostają.",
+                "Bez limitu długości komentarza", "Pisz komentarze dłuższe, niż pozwala TikTok. Serwer TikToka może odrzucić bardzo długi", "Ukryj proponowane osoby w Skrzynce", "Blok osób, które TikTok proponuje pod czatami"
+        });
         TABLES.put("tr", new String[]{
                 "TiktokPatchXposed", "Akış",
                 "Reklamları engelle", "Akışta, açılışta ve diğer video listelerinde",
@@ -600,7 +619,9 @@ final class I18n {
                 "Tüm ayarları sıfırla", "Tüm ayarlar sıfırlansın mı?", "Tüm anahtarlar, filtreler, bölge ve renkler varsayılana döner. Bir kopya saklamak için önce ayarları dışa aktarın.", "Ayarlar sıfırlandı", "Geri alınan mesajları sakla", "Biri sohbette bir mesajı geri aldığında mesaj telefonunda “Geri alındı” işaretiyle kalır. Yalnızca telefonuna zaten ulaşmış mesajlar saklanır", "Geri alındı", "Çift dokunmayla beğeni yok", "Videoya çift dokunmak artık onu beğenmez; kalp düğmesi her zamanki gibi çalışır", "Hesap oluşturma tarihi", "Profillerde adın altında hesabın oluşturulduğu tam tarih ve saat. Çok eski musical.ly hesaplarında yoktur", "Oluşturuldu: %s",
                 "Öne çıkan görüntülemelerini gizle", "Profil sahibi seni öne çıkanları izleyenler arasında görmez",
                 "LIVE kaydet", "LIVE odalarındaki REC düğmesi yayını seçtiğin kalitede Movies/TikTok klasörüne (MP4) kaydeder veya bağlantısını kopyalar", "Bu LIVE'ı kaydet", "Kalite seç", "Yayın bağlantısını kopyala", "En iyi kalite, VLC gibi bir oynatıcıda açmak için", "Henüz yayın bulunamadı. LIVE oynamaya başlayınca REC'e tekrar dokun", "Kayıt başladı. Durdurmak için ■ simgesine dokun", "LIVE kaydı Movies/TikTok klasörüne kaydedildi", "Bu LIVE kaydedilemedi", "Yayın bağlantısı kopyalandı",
-                "Ülkeler", "Ülkeleri gizle", "TikTok'un hesaba atadığı ülke, bayrakta görünen. Kişi başka bir yerde yaşıyor olabilir. Ülkesi olmayan videolar kalır."});
+                "Ülkeler", "Ülkeleri gizle", "TikTok'un hesaba atadığı ülke, bayrakta görünen. Kişi başka bir yerde yaşıyor olabilir. Ülkesi olmayan videolar kalır.",
+                "Yorum uzunluğu sınırı yok", "TikTok'un izin verdiğinden uzun yorumlar yazın. TikTok sunucusu çok uzun bir yorumu yine de reddedebilir", "Gelen Kutusu'nda önerilen kişileri gizle", "TikTok'un sohbetlerinizin altında önerdiği kişiler bloğu"
+        });
         TABLES.put("id", new String[]{
                 "TiktokPatchXposed", "Feed",
                 "Blokir iklan", "Di feed, saat dibuka, dan di daftar video lainnya",
@@ -652,7 +673,9 @@ final class I18n {
                 "Setel ulang semua pengaturan", "Setel ulang semua pengaturan?", "Semua sakelar, filter, wilayah, dan warna kembali ke bawaan. Ekspor pengaturan terlebih dahulu untuk menyimpan salinan.", "Pengaturan disetel ulang", "Simpan pesan yang ditarik", "Saat seseorang menarik pesan di chat, pesan tetap ada di ponselmu dengan tanda “Ditarik”. Hanya pesan yang sudah sampai di ponsel yang bisa disimpan", "Ditarik", "Tanpa suka dengan ketuk dua kali", "Mengetuk dua kali video tidak lagi menyukainya; tombol hati tetap berfungsi seperti biasa", "Tanggal pembuatan akun", "Di profil, di bawah nama: tanggal dan waktu tepat akun dibuat. Akun musical.ly yang sangat lama tidak memilikinya", "Dibuat %s",
                 "Sembunyikan tontonan sorotan", "Pembuat tidak akan melihatmu di antara penonton sorotan profilnya",
                 "Rekam LIVE", "Tombol REC di ruang LIVE merekam siaran dengan kualitas pilihanmu ke Movies/TikTok (MP4) atau menyalin tautannya", "Rekam LIVE ini", "Pilih kualitas", "Salin tautan siaran", "Kualitas terbaik, untuk dibuka di pemutar seperti VLC", "Siaran belum ditemukan. Tunggu sampai LIVE mulai diputar, lalu ketuk REC lagi", "Perekaman dimulai. Ketuk ■ untuk berhenti", "Rekaman LIVE disimpan ke Movies/TikTok", "Tidak dapat merekam LIVE ini", "Tautan siaran disalin",
-                "Negara", "Sembunyikan negara", "Negara yang ditetapkan TikTok untuk akun, seperti pada bendera. Orangnya bisa tinggal di tempat lain. Video tanpa negara tetap tampil."});
+                "Negara", "Sembunyikan negara", "Negara yang ditetapkan TikTok untuk akun, seperti pada bendera. Orangnya bisa tinggal di tempat lain. Video tanpa negara tetap tampil.",
+                "Tanpa batas panjang komentar", "Tulis komentar lebih panjang dari batas TikTok. Server TikTok mungkin tetap menolak komentar yang sangat panjang", "Sembunyikan saran orang di Kotak Masuk", "Blok orang yang disarankan TikTok di bawah obrolan Anda"
+        });
         TABLES.put("ar", new String[]{
                 "TiktokPatchXposed", "الموجز", "حظر الإعلانات", "الإعلانات في الموجز وعند بدء التشغيل وقوائم الفيديو الأخرى", "إخفاء البث المباشر",
                 "البث المباشر في الموجز وزر LIVE", "إخفاء «أشخاص قد تعرفهم»", "الفيديوهات المقترحة من جهات اتصالك", "شريط التقدم في كل فيديو", "حتى في المقاطع القصيرة: يبقى الشريط مخفيًا هناك، اسحب على الحافة السفلية للفيديو",
@@ -733,7 +756,9 @@ final class I18n {
                 "إعادة تعيين جميع الإعدادات", "إعادة تعيين جميع الإعدادات؟", "ستعود كل المفاتيح والفلاتر والمنطقة والألوان إلى قيمها الافتراضية. صدّر الإعدادات أولًا للاحتفاظ بنسخة.", "تمت إعادة تعيين الإعدادات", "الاحتفاظ بالرسائل المحذوفة", "عندما يلغي شخص إرسال رسالة في الدردشة، تبقى على هاتفك مع علامة «محذوفة». يمكن الاحتفاظ فقط بالرسائل التي وصلت إلى هاتفك قبل حذفها", "محذوفة", "بدون إعجاب بالنقر المزدوج", "النقر المزدوج على الفيديو لم يعد يضع إعجابًا؛ زر القلب يعمل كالمعتاد", "تاريخ إنشاء الحساب", "في الملفات الشخصية: تاريخ ووقت إنشاء الحساب بالضبط تحت الاسم. لا يتوفر لحسابات musical.ly القديمة جدًا", "أُنشئ في %s",
                 "إخفاء مشاهدات القصص المميزة", "لن يظهر اسمك لصاحب الملف الشخصي ضمن مشاهدي قصصه المميزة",
                 "تسجيل البث المباشر", "زر REC داخل البث المباشر يسجّل البث بالجودة التي تختارها في Movies/TikTok (MP4) أو ينسخ رابطه", "تسجيل هذا البث", "اختر الجودة", "نسخ رابط البث", "أفضل جودة، لفتحه في مشغّل مثل VLC", "لم يُعثر على البث بعد. انتظر حتى يبدأ تشغيل البث ثم اضغط REC مجدداً", "بدأ التسجيل. اضغط ■ لإيقافه", "تم حفظ تسجيل البث في Movies/TikTok", "تعذّر تسجيل هذا البث", "تم نسخ رابط البث",
-                "الدول", "إخفاء الدول", "الدولة التي حددها TikTok للحساب، كما يظهر في العلم. قد يعيش الشخص في مكان آخر. تبقى الفيديوهات التي بلا دولة."});
+                "الدول", "إخفاء الدول", "الدولة التي حددها TikTok للحساب، كما يظهر في العلم. قد يعيش الشخص في مكان آخر. تبقى الفيديوهات التي بلا دولة.",
+                "بدون حد لطول التعليق", "اكتب تعليقات أطول مما يسمح به TikTok. قد يرفض خادم TikTok التعليق الطويل جدًا", "إخفاء الأشخاص المقترحين في البريد الوارد", "قسم الأشخاص الذين يقترحهم TikTok أسفل محادثاتك"
+        });
         TABLES.put("zh", new String[]{
                 "TiktokPatchXposed", "推荐", "屏蔽广告", "推荐流、启动时和其他视频列表中的广告", "隐藏直播", "推荐流中的直播和 LIVE 按钮", "隐藏“你可能认识的人”", "根据你的通讯录推荐的视频",
                 "所有视频都可拖动进度", "包括短视频：短视频上进度条不显示，在视频底部边缘左右拖动即可", "评论", "带评论转发", "转发视频时附上你自己的评论", "新版主页布局", "左对齐的主页，带横幅", "TikTok 隐藏功能",
@@ -788,7 +813,9 @@ final class I18n {
                 "重置所有设置", "重置所有设置？", "所有开关、过滤、地区和颜色都将恢复默认。如需保留副本，请先导出设置。", "设置已重置", "保留撤回的消息", "对方在聊天中撤回消息后，消息仍留在你的手机上，并标为“已撤回”。只能保留已经收到的消息", "已撤回", "双击不点赞", "双击视频不再点赞；红心按钮照常使用", "账号创建日期", "在主页名字下方显示账号创建的确切日期和时间。很早的 musical.ly 账号没有此信息", "创建于 %s",
                 "隐藏主页精选浏览记录", "作者不会在主页精选的观看者中看到你",
                 "录制直播", "直播间里的 REC 按钮按所选画质把直播录制到 Movies/TikTok（MP4），或复制直播流链接", "录制这场直播", "选择画质", "复制直播流链接", "最佳画质，可在 VLC 等播放器中打开", "尚未找到直播流。请等直播开始播放后再点 REC", "已开始录制。点 ■ 停止", "直播录像已保存到 Movies/TikTok", "无法录制这场直播", "已复制直播流链接",
-                "国家/地区", "隐藏国家/地区", "TikTok 为账号指定的国家/地区，与旗帜显示的一致，不一定是其实际居住地。没有国家/地区的视频会保留。"});
+                "国家/地区", "隐藏国家/地区", "TikTok 为账号指定的国家/地区，与旗帜显示的一致，不一定是其实际居住地。没有国家/地区的视频会保留。",
+                "取消评论长度限制", "可以写超过 TikTok 限制的评论。TikTok 服务器仍可能拒绝过长的评论", "隐藏收件箱中的推荐用户", "TikTok 在聊天下方推荐的用户区块"
+        });
     }
 
     private static volatile String[] current = TABLES.get("en");

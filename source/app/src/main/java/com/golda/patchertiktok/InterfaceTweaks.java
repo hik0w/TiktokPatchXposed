@@ -7,6 +7,7 @@ package com.golda.patchertiktok;
  */
 final class InterfaceTweaks {
     private static final String INBOX_STORIES = "com.ss.android.ugc.aweme.inbox.skylight.InboxSkylightWidgetV2Injector";
+    private static final String INBOX_SUGGESTED = "com.ss.android.ugc.aweme.relation.recuser.inbox.RecommendUserWidgetV2Injector";
     private static final String LOGIN_WALL = "com.ss.android.ugc.aweme.services.MandatoryLoginService";
 
     private InterfaceTweaks() { }
@@ -19,6 +20,16 @@ final class InterfaceTweaks {
             Hooks.hookAll(stories, "enable", new Hooks.Hook() {
                 @Override protected void after(Hooks.Call param) {
                     if (Prefs.on(Prefs.HIDE_INBOX_STORIES)) param.setResult(false);
+                }
+            });
+        }
+        Class<?> suggested = Hooks.findClass(INBOX_SUGGESTED, loader);
+        if (suggested == null) {
+            RuntimeLog.log("inbox suggestions switch unavailable");
+        } else {
+            Hooks.hookAll(suggested, "enable", new Hooks.Hook() {
+                @Override protected void after(Hooks.Call param) {
+                    if (Prefs.on(Prefs.HIDE_INBOX_SUGGESTED)) param.setResult(false);
                 }
             });
         }
