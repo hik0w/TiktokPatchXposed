@@ -479,6 +479,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.PLAYBACK, S.GROUP_QUALITY, S.PHOTO_BEST, S.PHOTO_BEST_DESC, Prefs.PHOTO_BEST),
             new Setting(Category.INTERFACE, S.GROUP_COLORS, S.ACCENT, S.ACCENT_DESC, Prefs.ACCENT),
             new Setting(Category.INTERFACE, S.GROUP_COLORS, S.AMOLED, S.AMOLED_DESC, Prefs.AMOLED),
+            new Setting(Category.INTERFACE, S.GROUP_COLORS, S.CLASSIC_EMOJI, S.CLASSIC_EMOJI_DESC, Prefs.CLASSIC_EMOJI),
             new Setting(Category.INTERFACE, S.GROUP_SCREEN, S.BURN_IN, S.BURN_IN_DESC, Prefs.BURN_IN),
             new Setting(Category.INTERFACE, S.GROUP_SCREEN, S.KEEP_BRIGHTNESS, S.KEEP_BRIGHTNESS_DESC, Prefs.KEEP_BRIGHTNESS),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.NEW_PROFILE, S.NEW_PROFILE_DESC, Prefs.NEW_PROFILE),
@@ -2752,7 +2753,7 @@ public final class ModSettingsActivity extends Activity {
             Prefs.UNMUTE, Prefs.SELF_REPOST, Prefs.HD_UPLOAD, Prefs.GHOST_ONLINE, Prefs.GHOST_READ,
             Prefs.COMMENT_PHOTOS, Prefs.NO_HASHTAG_LIMIT, Prefs.CAMERA_EXTRAS, Prefs.HIDE_ROOT, Prefs.PIP_FEED,
             Prefs.PREFER_H264, Prefs.PHOTO_BEST, Prefs.NO_MOTION_SENSORS, Prefs.NO_TIKTOK_ANALYTICS, Prefs.UPLOAD_ORIGINAL,
-            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT};
+            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT, Prefs.CLASSIC_EMOJI};
 
     /**
      * A small mark after a row's title: an outlined "Beta" for settings under test, a plain
