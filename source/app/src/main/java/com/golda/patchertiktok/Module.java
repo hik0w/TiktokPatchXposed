@@ -139,6 +139,7 @@ final class Module {
             DownloadsPlus.install(loader);
         });
         run("A/B overrides", () -> AbOverrides.install(loader));
+        run("offline videos", () -> OfflineMore.install(loader));
         run("startup ads", () -> StartupAds.install(loader));
         run("seekbar", () -> Seekbar.install(loader));
         run("foreground", () -> Foreground.install(app));

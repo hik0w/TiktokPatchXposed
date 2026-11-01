@@ -505,6 +505,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.STORY_DOWNLOAD, S.STORY_DOWNLOAD_DESC, Prefs.STORY_DOWNLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.AVATAR_DOWNLOAD, S.AVATAR_DOWNLOAD_DESC, Prefs.AVATAR_DOWNLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.LIVE_RECORD, S.LIVE_RECORD_DESC, Prefs.LIVE_RECORD),
+            new Setting(Category.SHARING, S.GROUP_MEDIA, S.OFFLINE_MORE, S.OFFLINE_MORE_DESC, Prefs.OFFLINE_MORE),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.CHAT_STICKER, S.CHAT_STICKER_DESC, Prefs.CHAT_STICKER),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.HD_UPLOAD, S.HD_UPLOAD_DESC, Prefs.HD_UPLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.UPLOAD_ORIGINAL, S.UPLOAD_ORIGINAL_DESC, Prefs.UPLOAD_ORIGINAL),
@@ -804,7 +805,7 @@ public final class ModSettingsActivity extends Activity {
             {"resume position", "RESUME_POSITION"}, {"playback speed", "REMEMBER_SPEED"}, {"downloads plus", "QUALITY_PICKER"}, {"auto-scroll", "AUTO_SCROLL"}, {"comment media", "COMMENT_MEDIA"},
             {"comment copy", "COPY_COMMENT"}, {"external browser", "EXTERNAL_BROWSER"},
             {"interface", "HIDE_INBOX_STORIES"}, {"overlay", "OVERLAY_OPACITY"}, {"accent color", "ACCENT"},
-            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"comment limit", "COMMENT_NO_LIMIT"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
+            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"comment limit", "COMMENT_NO_LIMIT"}, {"offline videos", "OFFLINE_MORE"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
             {"invisible mode", "SECTION_GHOST"}, {"region", "REGION"}, {"recommendation", "REGION_LANGUAGE"},
             {"A/B overrides", "EXTRA_FEATURES"}, {"auto streaks", "AUTO_STREAK"}, {"streak sticker", "STREAK_STICKER"},
             {"friend card", "ACQUAINTANCES"}, {"unmute", "UNMUTE"}, {"font", "FONT"}, {"privacy", "SECTION_PRIVACY"},
@@ -2753,7 +2754,7 @@ public final class ModSettingsActivity extends Activity {
             Prefs.UNMUTE, Prefs.SELF_REPOST, Prefs.HD_UPLOAD, Prefs.GHOST_ONLINE, Prefs.GHOST_READ,
             Prefs.COMMENT_PHOTOS, Prefs.NO_HASHTAG_LIMIT, Prefs.CAMERA_EXTRAS, Prefs.HIDE_ROOT, Prefs.PIP_FEED,
             Prefs.PREFER_H264, Prefs.PHOTO_BEST, Prefs.NO_MOTION_SENSORS, Prefs.NO_TIKTOK_ANALYTICS, Prefs.UPLOAD_ORIGINAL,
-            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT, Prefs.CLASSIC_EMOJI};
+            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT, Prefs.CLASSIC_EMOJI, Prefs.OFFLINE_MORE};
 
     /**
      * A small mark after a row's title: an outlined "Beta" for settings under test, a plain

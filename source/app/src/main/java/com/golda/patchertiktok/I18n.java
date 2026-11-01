@@ -78,7 +78,8 @@ final class I18n {
         FILTER_COUNTRIES_SECTION, FILTER_COUNTRIES, FILTER_COUNTRIES_FOOTER,
         COMMENT_NO_LIMIT, COMMENT_NO_LIMIT_DESC, HIDE_INBOX_SUGGESTED, HIDE_INBOX_SUGGESTED_DESC,
         REPOST_PURGE, REPOST_PURGE_COUNTING, REPOST_PURGE_CONFIRM, REPOST_PURGE_PROGRESS, REPOST_PURGE_NONE, REPOST_PURGE_STOPPED,
-        CLASSIC_EMOJI, CLASSIC_EMOJI_DESC
+        CLASSIC_EMOJI, CLASSIC_EMOJI_DESC,
+        OFFLINE_MORE, OFFLINE_MORE_DESC
     }
 
     private static final Map<String, String[]> TABLES = new HashMap<>();
@@ -138,7 +139,8 @@ final class I18n {
                 "Countries", "Hide countries", "The country TikTok assigned to the account, the one the flag shows; not always where the person lives. Videos without a country stay.",
                 "No comment length limit", "Write comments longer than TikTok allows. TikTok's server may still refuse a very long one", "Hide suggested people in Inbox", "The block of people TikTok suggests under your chats",
                 "Remove all reposts", "Counting your reposts…", "%d reposts will be taken back. This can't be undone.", "Removed %1$d of %2$d", "You have no reposts", "Stopped: removed %d",
-                "Classic emojis", "Turns off TikTok's new emojis in comments, chats and reposts"
+                "Classic emojis", "Turns off TikTok's new emojis in comments, chats and reposts",
+                "More offline videos", "TikTok's offline viewing (profile menu → Offline videos) can keep up to 1500 videos. That takes about 5 GB"
         });
         TABLES.put("ru", new String[]{
                 "TiktokPatchXposed", "Лента",
@@ -194,7 +196,8 @@ final class I18n {
                 "Страны", "Скрывать страны", "Страна, которую TikTok присвоил аккаунту, как у флага. Человек может жить в другом месте. Видео без страны остаются.",
                 "Без лимита длины комментария", "Можно писать комментарии длиннее, чем разрешает TikTok. Сервер TikTok может не принять очень длинный", "Скрыть рекомендации людей во «Входящих»", "Блок людей, которых TikTok предлагает под чатами",
                 "Удалить все репосты", "Считаем ваши репосты…", "Будет удалено репостов: %d. Отменить это нельзя.", "Удалено %1$d из %2$d", "Репостов нет", "Остановлено, удалено: %d",
-                "Обычные эмодзи", "Выключает новые эмодзи TikTok в комментариях, чатах и репостах"
+                "Обычные эмодзи", "Выключает новые эмодзи TikTok в комментариях, чатах и репостах",
+                "Больше видео офлайн", "Просмотр офлайн в TikTok (меню профиля → Видео офлайн) хранит до 1500 видео. Это около 5 ГБ"
         });
         TABLES.put("uk", new String[]{
                 "TiktokPatchXposed", "Стрічка",
@@ -250,7 +253,8 @@ final class I18n {
                 "Країни", "Приховувати країни", "Країна, яку TikTok присвоїв акаунту, як у прапорця. Людина може жити деінде. Відео без країни залишаються.",
                 "Без ліміту довжини коментаря", "Можна писати коментарі довші, ніж дозволяє TikTok. Сервер TikTok може не прийняти дуже довгий", "Сховати рекомендації людей у «Вхідних»", "Блок людей, яких TikTok пропонує під чатами",
                 "Видалити всі репости", "Рахуємо ваші репости…", "Буде видалено репостів: %d. Скасувати це не можна.", "Видалено %1$d з %2$d", "Репостів немає", "Зупинено, видалено: %d",
-                "Звичайні емодзі", "Вимикає нові емодзі TikTok у коментарях, чатах і репостах"
+                "Звичайні емодзі", "Вимикає нові емодзі TikTok у коментарях, чатах і репостах",
+                "Більше відео офлайн", "Перегляд офлайн у TikTok (меню профілю → Відео офлайн) зберігає до 1500 відео. Це близько 5 ГБ"
         });
         TABLES.put("de", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -306,7 +310,8 @@ final class I18n {
                 "Länder", "Länder ausblenden", "Das Land, das TikTok dem Konto zugewiesen hat, wie bei der Flagge. Die Person kann anderswo leben. Videos ohne Land bleiben.",
                 "Keine Längenbegrenzung für Kommentare", "Schreibe längere Kommentare, als TikTok erlaubt. TikToks Server kann sehr lange trotzdem ablehnen", "Personenvorschläge im Eingang ausblenden", "Der Block mit Personen, die TikTok unter deinen Chats vorschlägt",
                 "Alle Reposts entfernen", "Deine Reposts werden gezählt…", "%d Reposts werden zurückgenommen. Das lässt sich nicht rückgängig machen.", "%1$d von %2$d entfernt", "Du hast keine Reposts", "Gestoppt: %d entfernt",
-                "Klassische Emojis", "Schaltet TikToks neue Emojis in Kommentaren, Chats und Reposts ab"
+                "Klassische Emojis", "Schaltet TikToks neue Emojis in Kommentaren, Chats und Reposts ab",
+                "Mehr Offline-Videos", "TikToks Offline-Ansicht (Profilmenü → Offline-Videos) behält bis zu 1500 Videos. Das sind etwa 5 GB"
         });
         TABLES.put("es", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -362,7 +367,8 @@ final class I18n {
                 "Países", "Ocultar países", "El país que TikTok asignó a la cuenta, el de la bandera. La persona puede vivir en otro lugar. Los videos sin país se quedan.",
                 "Sin límite de longitud en comentarios", "Escribe comentarios más largos de lo que permite TikTok. El servidor de TikTok puede rechazar uno muy largo", "Ocultar personas sugeridas en Bandeja", "El bloque de personas que TikTok sugiere bajo tus chats",
                 "Eliminar todos los reposts", "Contando tus reposts…", "Se quitarán %d reposts. Esto no se puede deshacer.", "Eliminados %1$d de %2$d", "No tienes reposts", "Detenido: %d eliminados",
-                "Emojis clásicos", "Desactiva los nuevos emojis de TikTok en comentarios, chats y reposts"
+                "Emojis clásicos", "Desactiva los nuevos emojis de TikTok en comentarios, chats y reposts",
+                "Más vídeos sin conexión", "La vista sin conexión de TikTok (menú del perfil → Vídeos sin conexión) guarda hasta 1500 vídeos. Ocupa unos 5 GB"
         });
         TABLES.put("pt", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -418,7 +424,8 @@ final class I18n {
                 "Países", "Ocultar países", "O país que o TikTok atribuiu à conta, o da bandeira. A pessoa pode morar em outro lugar. Vídeos sem país continuam.",
                 "Sem limite de tamanho nos comentários", "Escreva comentários maiores do que o TikTok permite. O servidor do TikTok ainda pode recusar um muito longo", "Ocultar pessoas sugeridas na Caixa de entrada", "O bloco de pessoas que o TikTok sugere abaixo das conversas",
                 "Remover todos os reposts", "Contando seus reposts…", "%d reposts serão removidos. Isso não pode ser desfeito.", "Removidos %1$d de %2$d", "Você não tem reposts", "Parado: %d removidos",
-                "Emojis clássicos", "Desativa os novos emojis do TikTok em comentários, conversas e reposts"
+                "Emojis clássicos", "Desativa os novos emojis do TikTok em comentários, conversas e reposts",
+                "Mais vídeos offline", "A visualização offline do TikTok (menu do perfil → Vídeos offline) guarda até 1500 vídeos. Isso ocupa cerca de 5 GB"
         });
         TABLES.put("fr", new String[]{
                 "TiktokPatchXposed", "Fil",
@@ -474,7 +481,8 @@ final class I18n {
                 "Pays", "Masquer des pays", "Le pays que TikTok a attribué au compte, celui du drapeau. La personne peut vivre ailleurs. Les vidéos sans pays restent.",
                 "Pas de limite de longueur des commentaires", "Écrivez des commentaires plus longs que ce que TikTok autorise. Le serveur de TikTok peut refuser un texte très long", "Masquer les personnes suggérées dans la boîte de réception", "Le bloc de personnes que TikTok suggère sous vos discussions",
                 "Supprimer tous les reposts", "Comptage de vos reposts…", "%d reposts seront retirés. Cette action est irréversible.", "%1$d sur %2$d supprimés", "Vous n'avez aucun repost", "Arrêté : %d supprimés",
-                "Emojis classiques", "Désactive les nouveaux emojis de TikTok dans les commentaires, discussions et reposts"
+                "Emojis classiques", "Désactive les nouveaux emojis de TikTok dans les commentaires, discussions et reposts",
+                "Plus de vidéos hors ligne", "Le visionnage hors ligne de TikTok (menu du profil → Vidéos hors ligne) garde jusqu'à 1500 vidéos. Cela prend environ 5 Go"
         });
         TABLES.put("it", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -530,7 +538,8 @@ final class I18n {
                 "Paesi", "Nascondi paesi", "Il paese che TikTok ha assegnato all'account, quello della bandiera. La persona può vivere altrove. I video senza paese restano.",
                 "Nessun limite di lunghezza dei commenti", "Scrivi commenti più lunghi di quanto consente TikTok. Il server di TikTok può comunque rifiutarne uno molto lungo", "Nascondi persone suggerite in Posta", "Il blocco di persone che TikTok suggerisce sotto le chat",
                 "Rimuovi tutti i repost", "Conteggio dei tuoi repost…", "Verranno rimossi %d repost. Non si può annullare.", "Rimossi %1$d di %2$d", "Non hai repost", "Interrotto: %d rimossi",
-                "Emoji classiche", "Disattiva le nuove emoji di TikTok in commenti, chat e repost"
+                "Emoji classiche", "Disattiva le nuove emoji di TikTok in commenti, chat e repost",
+                "Più video offline", "La visione offline di TikTok (menu del profilo → Video offline) conserva fino a 1500 video. Occupa circa 5 GB"
         });
         TABLES.put("pl", new String[]{
                 "TiktokPatchXposed", "Kanał",
@@ -586,7 +595,8 @@ final class I18n {
                 "Kraje", "Ukrywaj kraje", "Kraj przypisany do konta przez TikToka, ten z flagi. Osoba może mieszkać gdzie indziej. Filmy bez kraju zostają.",
                 "Bez limitu długości komentarza", "Pisz komentarze dłuższe, niż pozwala TikTok. Serwer TikToka może odrzucić bardzo długi", "Ukryj proponowane osoby w Skrzynce", "Blok osób, które TikTok proponuje pod czatami",
                 "Usuń wszystkie reposty", "Liczenie repostów…", "Reposty do usunięcia: %d. Tego nie można cofnąć.", "Usunięto %1$d z %2$d", "Nie masz repostów", "Zatrzymano, usunięto: %d",
-                "Klasyczne emoji", "Wyłącza nowe emoji TikToka w komentarzach, czatach i repostach"
+                "Klasyczne emoji", "Wyłącza nowe emoji TikToka w komentarzach, czatach i repostach",
+                "Więcej filmów offline", "Oglądanie offline w TikToku (menu profilu → Filmy offline) przechowuje do 1500 filmów. To około 5 GB"
         });
         TABLES.put("tr", new String[]{
                 "TiktokPatchXposed", "Akış",
@@ -642,7 +652,8 @@ final class I18n {
                 "Ülkeler", "Ülkeleri gizle", "TikTok'un hesaba atadığı ülke, bayrakta görünen. Kişi başka bir yerde yaşıyor olabilir. Ülkesi olmayan videolar kalır.",
                 "Yorum uzunluğu sınırı yok", "TikTok'un izin verdiğinden uzun yorumlar yazın. TikTok sunucusu çok uzun bir yorumu yine de reddedebilir", "Gelen Kutusu'nda önerilen kişileri gizle", "TikTok'un sohbetlerinizin altında önerdiği kişiler bloğu",
                 "Tüm yeniden paylaşımları kaldır", "Yeniden paylaşımlarınız sayılıyor…", "%d yeniden paylaşım kaldırılacak. Bu geri alınamaz.", "%2$d içinden %1$d kaldırıldı", "Yeniden paylaşımınız yok", "Durduruldu: %d kaldırıldı",
-                "Klasik emojiler", "Yorumlar, sohbetler ve yeniden paylaşımlarda TikTok'un yeni emojilerini kapatır"
+                "Klasik emojiler", "Yorumlar, sohbetler ve yeniden paylaşımlarda TikTok'un yeni emojilerini kapatır",
+                "Daha fazla çevrimdışı video", "TikTok'un çevrimdışı izleme özelliği (profil menüsü → Çevrimdışı videolar) 1500 videoya kadar saklar. Yaklaşık 5 GB yer kaplar"
         });
         TABLES.put("id", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -698,7 +709,8 @@ final class I18n {
                 "Negara", "Sembunyikan negara", "Negara yang ditetapkan TikTok untuk akun, seperti pada bendera. Orangnya bisa tinggal di tempat lain. Video tanpa negara tetap tampil.",
                 "Tanpa batas panjang komentar", "Tulis komentar lebih panjang dari batas TikTok. Server TikTok mungkin tetap menolak komentar yang sangat panjang", "Sembunyikan saran orang di Kotak Masuk", "Blok orang yang disarankan TikTok di bawah obrolan Anda",
                 "Hapus semua repost", "Menghitung repost Anda…", "%d repost akan dihapus. Ini tidak dapat dibatalkan.", "Dihapus %1$d dari %2$d", "Anda tidak punya repost", "Dihentikan: %d dihapus",
-                "Emoji klasik", "Mematikan emoji baru TikTok di komentar, obrolan, dan repost"
+                "Emoji klasik", "Mematikan emoji baru TikTok di komentar, obrolan, dan repost",
+                "Lebih banyak video offline", "Tontonan offline TikTok (menu profil → Video offline) menyimpan hingga 1500 video. Sekitar 5 GB"
         });
         TABLES.put("ar", new String[]{
                 "TiktokPatchXposed", "الموجز", "حظر الإعلانات", "الإعلانات في الموجز وعند بدء التشغيل وقوائم الفيديو الأخرى", "إخفاء البث المباشر",
@@ -783,7 +795,8 @@ final class I18n {
                 "الدول", "إخفاء الدول", "الدولة التي حددها TikTok للحساب، كما يظهر في العلم. قد يعيش الشخص في مكان آخر. تبقى الفيديوهات التي بلا دولة.",
                 "بدون حد لطول التعليق", "اكتب تعليقات أطول مما يسمح به TikTok. قد يرفض خادم TikTok التعليق الطويل جدًا", "إخفاء الأشخاص المقترحين في البريد الوارد", "قسم الأشخاص الذين يقترحهم TikTok أسفل محادثاتك",
                 "إزالة كل إعادات النشر", "جارٍ عدّ إعادات النشر…", "ستتم إزالة %d من إعادات النشر. لا يمكن التراجع عن ذلك.", "تمت إزالة %1$d من %2$d", "لا توجد لديك إعادات نشر", "توقف: تمت إزالة %d",
-                "الرموز التعبيرية الكلاسيكية", "يوقف رموز TikTok التعبيرية الجديدة في التعليقات والمحادثات وإعادات النشر"
+                "الرموز التعبيرية الكلاسيكية", "يوقف رموز TikTok التعبيرية الجديدة في التعليقات والمحادثات وإعادات النشر",
+                "مزيد من مقاطع الفيديو دون اتصال", "تحتفظ مشاهدة TikTok دون اتصال (قائمة الملف الشخصي ← مقاطع الفيديو دون اتصال) بما يصل إلى 1500 مقطع. تشغل نحو 5 جيجابايت"
         });
         TABLES.put("zh", new String[]{
                 "TiktokPatchXposed", "推荐", "屏蔽广告", "推荐流、启动时和其他视频列表中的广告", "隐藏直播", "推荐流中的直播和 LIVE 按钮", "隐藏“你可能认识的人”", "根据你的通讯录推荐的视频",
@@ -842,7 +855,8 @@ final class I18n {
                 "国家/地区", "隐藏国家/地区", "TikTok 为账号指定的国家/地区，与旗帜显示的一致，不一定是其实际居住地。没有国家/地区的视频会保留。",
                 "取消评论长度限制", "可以写超过 TikTok 限制的评论。TikTok 服务器仍可能拒绝过长的评论", "隐藏收件箱中的推荐用户", "TikTok 在聊天下方推荐的用户区块",
                 "移除所有转发", "正在统计你的转发…", "将移除 %d 条转发。此操作无法撤销。", "已移除 %1$d / %2$d", "你没有转发", "已停止：移除了 %d 条",
-                "经典表情", "关闭 TikTok 在评论、聊天和转发中的新表情"
+                "经典表情", "关闭 TikTok 在评论、聊天和转发中的新表情",
+                "更多离线视频", "TikTok 离线观看（个人主页菜单 → 离线视频）最多保留 1500 个视频，约占 5 GB"
         });
     }
 

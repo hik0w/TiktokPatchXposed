@@ -94,6 +94,7 @@ final class Prefs {
     static final String HIDE_INBOX_SUGGESTED = "hide_inbox_suggested";
     static final String COMMENT_NO_LIMIT = "comment_no_limit";
     static final String CLASSIC_EMOJI = "classic_emoji";
+    static final String OFFLINE_MORE = "offline_more";
     static final String ACCENT = "accent_enabled";
     static final String ACCENT_COLOR = "accent_color";
     static final long DEFAULT_ACCENT = 0x8B5CF6;
@@ -167,7 +168,7 @@ final class Prefs {
     static final String DEFAULT_REGION = "de";
 
     /** Keys whose hooks only take effect when TikTok starts. */
-    static final String[] RESTART_KEYS = {COMMENT_REPOSTS, NEW_PROFILE, EXTRA_FEATURES, REGION, REGION_LANGUAGE, FEED_REGION_OWN, ADS, HIDE_INBOX_STORIES, HIDE_INBOX_SUGGESTED, COMMENT_NO_LIMIT, CLASSIC_EMOJI, ACCENT, AMOLED, SPOOF_ANDROID_ID, SELF_REPOST, FONT,
+    static final String[] RESTART_KEYS = {COMMENT_REPOSTS, NEW_PROFILE, EXTRA_FEATURES, REGION, REGION_LANGUAGE, FEED_REGION_OWN, ADS, HIDE_INBOX_STORIES, HIDE_INBOX_SUGGESTED, COMMENT_NO_LIMIT, CLASSIC_EMOJI, OFFLINE_MORE, ACCENT, AMOLED, SPOOF_ANDROID_ID, SELF_REPOST, FONT,
             COMMENT_PHOTOS, NO_HASHTAG_LIMIT, SPEED_3X, CAMERA_EXTRAS, PIP_FEED, HIDE_PASSKEY, NO_MOTION_SENSORS, NO_TRACKERS, UPLOAD_ORIGINAL};
 
     private static final Map<String, Boolean> DEFAULTS = new ConcurrentHashMap<>();
@@ -227,6 +228,7 @@ final class Prefs {
         DEFAULTS.put(HIDE_INBOX_SUGGESTED, false);
         DEFAULTS.put(COMMENT_NO_LIMIT, false);
         DEFAULTS.put(CLASSIC_EMOJI, false);
+        DEFAULTS.put(OFFLINE_MORE, false);
         DEFAULTS.put(ACCENT, false);
         DEFAULTS.put(BURN_IN, false);
         DEFAULTS.put(AUTHOR_REGION, false);
