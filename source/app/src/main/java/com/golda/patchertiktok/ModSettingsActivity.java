@@ -606,8 +606,74 @@ public final class ModSettingsActivity extends Activity {
         LinearLayout report = row(help);
         texts(report, I18n.get(S.BUG_REPORT), I18n.get(S.BUG_REPORT_DESC));
         report.setOnClickListener(Safe.click("settings", view -> openSheet(reportSheet())));
+        navigation(help, I18n.get(S.REPOST_PURGE), null, view -> openSheet(purgeSheet()));
         navigation(help, I18n.get(S.RESET_ALL), null, view -> openSheet(resetSheet()));
         return page.root;
+    }
+
+    /** Counts the reposts first, then asks. Closing the sheet stops the removal. */
+    private View purgeSheet() {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout info = row(content);
+        info.setClickable(false);
+        info.setBackground(null);
+        TextView status = (TextView) texts(info, I18n.get(S.REPOST_PURGE), I18n.get(S.REPOST_PURGE_COUNTING)).getChildAt(1);
+        LinearLayout remove = row(content);
+        texts(remove, I18n.get(S.REPOST_PURGE), null);
+        remove.setVisibility(View.GONE);
+        LinearLayout cancel = row(content);
+        texts(cancel, getString(android.R.string.cancel), null);
+        cancel.setOnClickListener(Safe.click("settings", view -> closeSheet()));
+        android.content.Context app = getApplicationContext();
+        new Thread(Safe.run("repost cleaner", () -> {
+            java.util.List<RepostCleaner.Repost> reposts;
+            try {
+                reposts = RepostCleaner.list(app);
+            } catch (Exception error) {
+                RuntimeLog.log("repost cleaner: list failed, " + error);
+                runOnUiThread(Safe.run("repost cleaner", () -> status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_STOPPED), 0))));
+                return;
+            }
+            runOnUiThread(Safe.run("repost cleaner", () -> {
+                if (reposts.isEmpty()) {
+                    status.setText(I18n.get(S.REPOST_PURGE_NONE));
+                    return;
+                }
+                status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_CONFIRM), reposts.size()));
+                remove.setVisibility(View.VISIBLE);
+                remove.setOnClickListener(Safe.click("settings", view -> {
+                    remove.setVisibility(View.GONE);
+                    removeReposts(app, reposts, status);
+                }));
+            }));
+        }), "tpx-reposts").start();
+        return content;
+    }
+
+    private void removeReposts(android.content.Context app, java.util.List<RepostCleaner.Repost> reposts, TextView status) {
+        int total = reposts.size();
+        new Thread(Safe.run("repost cleaner", () -> {
+            int removed = 0;
+            try {
+                removed = RepostCleaner.remove(app, reposts, new RepostCleaner.Progress() {
+                    @Override public boolean wanted() { return status.isAttachedToWindow(); }
+
+                    @Override public void removed(int done) {
+                        runOnUiThread(Safe.run("repost cleaner", () ->
+                                status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_PROGRESS), done, total))));
+                    }
+                });
+            } catch (Exception error) {
+                RuntimeLog.log("repost cleaner: stopped, " + error);
+            }
+            int done = removed;
+            runOnUiThread(Safe.run("repost cleaner", () -> {
+                String text = String.format(locale, I18n.get(done == total ? S.REPOST_PURGE_PROGRESS : S.REPOST_PURGE_STOPPED), done, total);
+                status.setText(text);
+                android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_SHORT).show();
+            }));
+        }), "tpx-reposts").start();
     }
 
     /** Asks before putting every setting back to its default (idea by RSR1337, PR #14). */

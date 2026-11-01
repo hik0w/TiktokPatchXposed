@@ -76,7 +76,8 @@ final class I18n {
         GHOST_HIGHLIGHTS, GHOST_HIGHLIGHTS_DESC,
         LIVE_RECORD, LIVE_RECORD_DESC, LIVE_REC_TITLE, LIVE_REC_PICK, LIVE_REC_COPY, LIVE_REC_COPY_DESC, LIVE_REC_NONE, LIVE_REC_STARTED, LIVE_REC_SAVED, LIVE_REC_FAILED, LIVE_REC_COPIED,
         FILTER_COUNTRIES_SECTION, FILTER_COUNTRIES, FILTER_COUNTRIES_FOOTER,
-        COMMENT_NO_LIMIT, COMMENT_NO_LIMIT_DESC, HIDE_INBOX_SUGGESTED, HIDE_INBOX_SUGGESTED_DESC
+        COMMENT_NO_LIMIT, COMMENT_NO_LIMIT_DESC, HIDE_INBOX_SUGGESTED, HIDE_INBOX_SUGGESTED_DESC,
+        REPOST_PURGE, REPOST_PURGE_COUNTING, REPOST_PURGE_CONFIRM, REPOST_PURGE_PROGRESS, REPOST_PURGE_NONE, REPOST_PURGE_STOPPED
     }
 
     private static final Map<String, String[]> TABLES = new HashMap<>();
@@ -134,7 +135,8 @@ final class I18n {
                 "Hide highlight views", "Authors won't see you among the viewers of their profile highlights",
                 "Record LIVEs", "A REC button in LIVE rooms records the stream in the quality you choose into Movies/TikTok (MP4), or copies its link", "Record this LIVE", "Choose a quality", "Copy stream link", "Best quality, to open in a player like VLC", "No stream found yet. Wait for the LIVE to start playing, then tap REC again", "Recording started. Tap ■ to stop", "LIVE recording saved to Movies/TikTok", "Couldn’t record this LIVE", "Stream link copied",
                 "Countries", "Hide countries", "The country TikTok assigned to the account, the one the flag shows; not always where the person lives. Videos without a country stay.",
-                "No comment length limit", "Write comments longer than TikTok allows. TikTok's server may still refuse a very long one", "Hide suggested people in Inbox", "The block of people TikTok suggests under your chats"
+                "No comment length limit", "Write comments longer than TikTok allows. TikTok's server may still refuse a very long one", "Hide suggested people in Inbox", "The block of people TikTok suggests under your chats",
+                "Remove all reposts", "Counting your reposts…", "%d reposts will be taken back. This can't be undone.", "Removed %1$d of %2$d", "You have no reposts", "Stopped: removed %d"
         });
         TABLES.put("ru", new String[]{
                 "TiktokPatchXposed", "Лента",
@@ -188,7 +190,8 @@ final class I18n {
                 "Скрыть просмотр подборок", "Автор не увидит вас среди зрителей подборок в своём профиле",
                 "Запись LIVE", "Кнопка REC в эфире записывает трансляцию в выбранном качестве в Movies/TikTok (MP4) или копирует ссылку на поток", "Записать этот LIVE", "Выберите качество", "Копировать ссылку на поток", "Лучшее качество — для плеера вроде VLC", "Поток пока не найден. Дождитесь, пока эфир начнёт воспроизводиться, и снова нажмите REC", "Запись началась. Нажмите ■, чтобы остановить", "Запись эфира сохранена в Movies/TikTok", "Не удалось записать этот эфир", "Ссылка на поток скопирована",
                 "Страны", "Скрывать страны", "Страна, которую TikTok присвоил аккаунту, как у флага. Человек может жить в другом месте. Видео без страны остаются.",
-                "Без лимита длины комментария", "Можно писать комментарии длиннее, чем разрешает TikTok. Сервер TikTok может не принять очень длинный", "Скрыть рекомендации людей во «Входящих»", "Блок людей, которых TikTok предлагает под чатами"
+                "Без лимита длины комментария", "Можно писать комментарии длиннее, чем разрешает TikTok. Сервер TikTok может не принять очень длинный", "Скрыть рекомендации людей во «Входящих»", "Блок людей, которых TikTok предлагает под чатами",
+                "Удалить все репосты", "Считаем ваши репосты…", "Будет удалено репостов: %d. Отменить это нельзя.", "Удалено %1$d из %2$d", "Репостов нет", "Остановлено, удалено: %d"
         });
         TABLES.put("uk", new String[]{
                 "TiktokPatchXposed", "Стрічка",
@@ -242,7 +245,8 @@ final class I18n {
                 "Приховати перегляд добірок", "Автор не побачить вас серед глядачів добірок у своєму профілі",
                 "Запис LIVE", "Кнопка REC в ефірі записує трансляцію у вибраній якості в Movies/TikTok (MP4) або копіює посилання на потік", "Записати цей LIVE", "Виберіть якість", "Копіювати посилання на потік", "Найкраща якість — для плеєра на кшталт VLC", "Потік ще не знайдено. Зачекайте, поки ефір почне відтворюватися, і знову натисніть REC", "Запис почався. Натисніть ■, щоб зупинити", "Запис ефіру збережено в Movies/TikTok", "Не вдалося записати цей ефір", "Посилання на потік скопійовано",
                 "Країни", "Приховувати країни", "Країна, яку TikTok присвоїв акаунту, як у прапорця. Людина може жити деінде. Відео без країни залишаються.",
-                "Без ліміту довжини коментаря", "Можна писати коментарі довші, ніж дозволяє TikTok. Сервер TikTok може не прийняти дуже довгий", "Сховати рекомендації людей у «Вхідних»", "Блок людей, яких TikTok пропонує під чатами"
+                "Без ліміту довжини коментаря", "Можна писати коментарі довші, ніж дозволяє TikTok. Сервер TikTok може не прийняти дуже довгий", "Сховати рекомендації людей у «Вхідних»", "Блок людей, яких TikTok пропонує під чатами",
+                "Видалити всі репости", "Рахуємо ваші репости…", "Буде видалено репостів: %d. Скасувати це не можна.", "Видалено %1$d з %2$d", "Репостів немає", "Зупинено, видалено: %d"
         });
         TABLES.put("de", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -296,7 +300,8 @@ final class I18n {
                 "Highlight-Aufrufe verbergen", "Der Autor sieht dich nicht unter den Zuschauern seiner Profil-Highlights",
                 "LIVEs aufnehmen", "Eine REC-Taste in LIVE-Räumen nimmt den Stream in der gewählten Qualität in Movies/TikTok auf (MP4) oder kopiert seinen Link", "Dieses LIVE aufnehmen", "Qualität wählen", "Stream-Link kopieren", "Beste Qualität, zum Öffnen in einem Player wie VLC", "Noch kein Stream gefunden. Warte, bis das LIVE abgespielt wird, und tippe dann erneut auf REC", "Aufnahme gestartet. Zum Beenden auf ■ tippen", "LIVE-Aufnahme in Movies/TikTok gespeichert", "Dieses LIVE konnte nicht aufgenommen werden", "Stream-Link kopiert",
                 "Länder", "Länder ausblenden", "Das Land, das TikTok dem Konto zugewiesen hat, wie bei der Flagge. Die Person kann anderswo leben. Videos ohne Land bleiben.",
-                "Keine Längenbegrenzung für Kommentare", "Schreibe längere Kommentare, als TikTok erlaubt. TikToks Server kann sehr lange trotzdem ablehnen", "Personenvorschläge im Eingang ausblenden", "Der Block mit Personen, die TikTok unter deinen Chats vorschlägt"
+                "Keine Längenbegrenzung für Kommentare", "Schreibe längere Kommentare, als TikTok erlaubt. TikToks Server kann sehr lange trotzdem ablehnen", "Personenvorschläge im Eingang ausblenden", "Der Block mit Personen, die TikTok unter deinen Chats vorschlägt",
+                "Alle Reposts entfernen", "Deine Reposts werden gezählt…", "%d Reposts werden zurückgenommen. Das lässt sich nicht rückgängig machen.", "%1$d von %2$d entfernt", "Du hast keine Reposts", "Gestoppt: %d entfernt"
         });
         TABLES.put("es", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -350,7 +355,8 @@ final class I18n {
                 "Ocultar vistas de destacados", "El autor no te verá entre los espectadores de los destacados de su perfil",
                 "Grabar LIVE", "Un botón REC en los LIVE graba la transmisión en la calidad que elijas en Movies/TikTok (MP4) o copia su enlace", "Grabar este LIVE", "Elige una calidad", "Copiar enlace del stream", "Mejor calidad, para abrir en un reproductor como VLC", "Aún no se encontró la transmisión. Espera a que el LIVE empiece a reproducirse y toca REC otra vez", "Grabación iniciada. Toca ■ para detenerla", "Grabación del LIVE guardada en Movies/TikTok", "No se pudo grabar este LIVE", "Enlace del stream copiado",
                 "Países", "Ocultar países", "El país que TikTok asignó a la cuenta, el de la bandera. La persona puede vivir en otro lugar. Los videos sin país se quedan.",
-                "Sin límite de longitud en comentarios", "Escribe comentarios más largos de lo que permite TikTok. El servidor de TikTok puede rechazar uno muy largo", "Ocultar personas sugeridas en Bandeja", "El bloque de personas que TikTok sugiere bajo tus chats"
+                "Sin límite de longitud en comentarios", "Escribe comentarios más largos de lo que permite TikTok. El servidor de TikTok puede rechazar uno muy largo", "Ocultar personas sugeridas en Bandeja", "El bloque de personas que TikTok sugiere bajo tus chats",
+                "Eliminar todos los reposts", "Contando tus reposts…", "Se quitarán %d reposts. Esto no se puede deshacer.", "Eliminados %1$d de %2$d", "No tienes reposts", "Detenido: %d eliminados"
         });
         TABLES.put("pt", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -404,7 +410,8 @@ final class I18n {
                 "Ocultar visualizações de destaques", "O autor não verá você entre os espectadores dos destaques do perfil",
                 "Gravar LIVEs", "Um botão REC nas LIVEs grava a transmissão na qualidade que você escolher em Movies/TikTok (MP4) ou copia o link", "Gravar esta LIVE", "Escolha a qualidade", "Copiar link da transmissão", "Melhor qualidade, para abrir num player como o VLC", "Nenhuma transmissão encontrada ainda. Espere a LIVE começar a tocar e toque em REC de novo", "Gravação iniciada. Toque em ■ para parar", "Gravação da LIVE salva em Movies/TikTok", "Não foi possível gravar esta LIVE", "Link da transmissão copiado",
                 "Países", "Ocultar países", "O país que o TikTok atribuiu à conta, o da bandeira. A pessoa pode morar em outro lugar. Vídeos sem país continuam.",
-                "Sem limite de tamanho nos comentários", "Escreva comentários maiores do que o TikTok permite. O servidor do TikTok ainda pode recusar um muito longo", "Ocultar pessoas sugeridas na Caixa de entrada", "O bloco de pessoas que o TikTok sugere abaixo das conversas"
+                "Sem limite de tamanho nos comentários", "Escreva comentários maiores do que o TikTok permite. O servidor do TikTok ainda pode recusar um muito longo", "Ocultar pessoas sugeridas na Caixa de entrada", "O bloco de pessoas que o TikTok sugere abaixo das conversas",
+                "Remover todos os reposts", "Contando seus reposts…", "%d reposts serão removidos. Isso não pode ser desfeito.", "Removidos %1$d de %2$d", "Você não tem reposts", "Parado: %d removidos"
         });
         TABLES.put("fr", new String[]{
                 "TiktokPatchXposed", "Fil",
@@ -458,7 +465,8 @@ final class I18n {
                 "Masquer les vues de highlights", "L'auteur ne vous verra pas parmi les spectateurs des highlights de son profil",
                 "Enregistrer les LIVE", "Un bouton REC dans les LIVE enregistre le flux dans la qualité choisie dans Movies/TikTok (MP4) ou copie son lien", "Enregistrer ce LIVE", "Choisissez une qualité", "Copier le lien du flux", "Meilleure qualité, à ouvrir dans un lecteur comme VLC", "Aucun flux trouvé pour l’instant. Attendez que le LIVE démarre, puis touchez REC à nouveau", "Enregistrement lancé. Touchez ■ pour l’arrêter", "Enregistrement du LIVE sauvegardé dans Movies/TikTok", "Impossible d’enregistrer ce LIVE", "Lien du flux copié",
                 "Pays", "Masquer des pays", "Le pays que TikTok a attribué au compte, celui du drapeau. La personne peut vivre ailleurs. Les vidéos sans pays restent.",
-                "Pas de limite de longueur des commentaires", "Écrivez des commentaires plus longs que ce que TikTok autorise. Le serveur de TikTok peut refuser un texte très long", "Masquer les personnes suggérées dans la boîte de réception", "Le bloc de personnes que TikTok suggère sous vos discussions"
+                "Pas de limite de longueur des commentaires", "Écrivez des commentaires plus longs que ce que TikTok autorise. Le serveur de TikTok peut refuser un texte très long", "Masquer les personnes suggérées dans la boîte de réception", "Le bloc de personnes que TikTok suggère sous vos discussions",
+                "Supprimer tous les reposts", "Comptage de vos reposts…", "%d reposts seront retirés. Cette action est irréversible.", "%1$d sur %2$d supprimés", "Vous n'avez aucun repost", "Arrêté : %d supprimés"
         });
         TABLES.put("it", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -512,7 +520,8 @@ final class I18n {
                 "Nascondi visualizzazioni delle evidenze", "L'autore non ti vedrà tra gli spettatori delle evidenze del profilo",
                 "Registra i LIVE", "Un pulsante REC nei LIVE registra la diretta nella qualità scelta in Movies/TikTok (MP4) o ne copia il link", "Registra questo LIVE", "Scegli la qualità", "Copia link dello stream", "Qualità migliore, da aprire in un lettore come VLC", "Nessuno stream trovato. Attendi che il LIVE inizi a riprodursi, poi tocca di nuovo REC", "Registrazione avviata. Tocca ■ per fermarla", "Registrazione del LIVE salvata in Movies/TikTok", "Impossibile registrare questo LIVE", "Link dello stream copiato",
                 "Paesi", "Nascondi paesi", "Il paese che TikTok ha assegnato all'account, quello della bandiera. La persona può vivere altrove. I video senza paese restano.",
-                "Nessun limite di lunghezza dei commenti", "Scrivi commenti più lunghi di quanto consente TikTok. Il server di TikTok può comunque rifiutarne uno molto lungo", "Nascondi persone suggerite in Posta", "Il blocco di persone che TikTok suggerisce sotto le chat"
+                "Nessun limite di lunghezza dei commenti", "Scrivi commenti più lunghi di quanto consente TikTok. Il server di TikTok può comunque rifiutarne uno molto lungo", "Nascondi persone suggerite in Posta", "Il blocco di persone che TikTok suggerisce sotto le chat",
+                "Rimuovi tutti i repost", "Conteggio dei tuoi repost…", "Verranno rimossi %d repost. Non si può annullare.", "Rimossi %1$d di %2$d", "Non hai repost", "Interrotto: %d rimossi"
         });
         TABLES.put("pl", new String[]{
                 "TiktokPatchXposed", "Kanał",
@@ -566,7 +575,8 @@ final class I18n {
                 "Ukryj wyświetlenia wyróżnień", "Autor nie zobaczy cię wśród widzów wyróżnień w swoim profilu",
                 "Nagrywanie LIVE", "Przycisk REC w transmisjach LIVE nagrywa strumień w wybranej jakości do Movies/TikTok (MP4) albo kopiuje jego link", "Nagraj tę transmisję LIVE", "Wybierz jakość", "Kopiuj link do strumienia", "Najlepsza jakość, do otwarcia w odtwarzaczu takim jak VLC", "Nie znaleziono jeszcze strumienia. Poczekaj, aż LIVE zacznie się odtwarzać, i ponownie dotknij REC", "Nagrywanie rozpoczęte. Dotknij ■, aby zatrzymać", "Nagranie LIVE zapisano w Movies/TikTok", "Nie udało się nagrać tej transmisji LIVE", "Skopiowano link do strumienia",
                 "Kraje", "Ukrywaj kraje", "Kraj przypisany do konta przez TikToka, ten z flagi. Osoba może mieszkać gdzie indziej. Filmy bez kraju zostają.",
-                "Bez limitu długości komentarza", "Pisz komentarze dłuższe, niż pozwala TikTok. Serwer TikToka może odrzucić bardzo długi", "Ukryj proponowane osoby w Skrzynce", "Blok osób, które TikTok proponuje pod czatami"
+                "Bez limitu długości komentarza", "Pisz komentarze dłuższe, niż pozwala TikTok. Serwer TikToka może odrzucić bardzo długi", "Ukryj proponowane osoby w Skrzynce", "Blok osób, które TikTok proponuje pod czatami",
+                "Usuń wszystkie reposty", "Liczenie repostów…", "Reposty do usunięcia: %d. Tego nie można cofnąć.", "Usunięto %1$d z %2$d", "Nie masz repostów", "Zatrzymano, usunięto: %d"
         });
         TABLES.put("tr", new String[]{
                 "TiktokPatchXposed", "Akış",
@@ -620,7 +630,8 @@ final class I18n {
                 "Öne çıkan görüntülemelerini gizle", "Profil sahibi seni öne çıkanları izleyenler arasında görmez",
                 "LIVE kaydet", "LIVE odalarındaki REC düğmesi yayını seçtiğin kalitede Movies/TikTok klasörüne (MP4) kaydeder veya bağlantısını kopyalar", "Bu LIVE'ı kaydet", "Kalite seç", "Yayın bağlantısını kopyala", "En iyi kalite, VLC gibi bir oynatıcıda açmak için", "Henüz yayın bulunamadı. LIVE oynamaya başlayınca REC'e tekrar dokun", "Kayıt başladı. Durdurmak için ■ simgesine dokun", "LIVE kaydı Movies/TikTok klasörüne kaydedildi", "Bu LIVE kaydedilemedi", "Yayın bağlantısı kopyalandı",
                 "Ülkeler", "Ülkeleri gizle", "TikTok'un hesaba atadığı ülke, bayrakta görünen. Kişi başka bir yerde yaşıyor olabilir. Ülkesi olmayan videolar kalır.",
-                "Yorum uzunluğu sınırı yok", "TikTok'un izin verdiğinden uzun yorumlar yazın. TikTok sunucusu çok uzun bir yorumu yine de reddedebilir", "Gelen Kutusu'nda önerilen kişileri gizle", "TikTok'un sohbetlerinizin altında önerdiği kişiler bloğu"
+                "Yorum uzunluğu sınırı yok", "TikTok'un izin verdiğinden uzun yorumlar yazın. TikTok sunucusu çok uzun bir yorumu yine de reddedebilir", "Gelen Kutusu'nda önerilen kişileri gizle", "TikTok'un sohbetlerinizin altında önerdiği kişiler bloğu",
+                "Tüm yeniden paylaşımları kaldır", "Yeniden paylaşımlarınız sayılıyor…", "%d yeniden paylaşım kaldırılacak. Bu geri alınamaz.", "%2$d içinden %1$d kaldırıldı", "Yeniden paylaşımınız yok", "Durduruldu: %d kaldırıldı"
         });
         TABLES.put("id", new String[]{
                 "TiktokPatchXposed", "Feed",
@@ -674,7 +685,8 @@ final class I18n {
                 "Sembunyikan tontonan sorotan", "Pembuat tidak akan melihatmu di antara penonton sorotan profilnya",
                 "Rekam LIVE", "Tombol REC di ruang LIVE merekam siaran dengan kualitas pilihanmu ke Movies/TikTok (MP4) atau menyalin tautannya", "Rekam LIVE ini", "Pilih kualitas", "Salin tautan siaran", "Kualitas terbaik, untuk dibuka di pemutar seperti VLC", "Siaran belum ditemukan. Tunggu sampai LIVE mulai diputar, lalu ketuk REC lagi", "Perekaman dimulai. Ketuk ■ untuk berhenti", "Rekaman LIVE disimpan ke Movies/TikTok", "Tidak dapat merekam LIVE ini", "Tautan siaran disalin",
                 "Negara", "Sembunyikan negara", "Negara yang ditetapkan TikTok untuk akun, seperti pada bendera. Orangnya bisa tinggal di tempat lain. Video tanpa negara tetap tampil.",
-                "Tanpa batas panjang komentar", "Tulis komentar lebih panjang dari batas TikTok. Server TikTok mungkin tetap menolak komentar yang sangat panjang", "Sembunyikan saran orang di Kotak Masuk", "Blok orang yang disarankan TikTok di bawah obrolan Anda"
+                "Tanpa batas panjang komentar", "Tulis komentar lebih panjang dari batas TikTok. Server TikTok mungkin tetap menolak komentar yang sangat panjang", "Sembunyikan saran orang di Kotak Masuk", "Blok orang yang disarankan TikTok di bawah obrolan Anda",
+                "Hapus semua repost", "Menghitung repost Anda…", "%d repost akan dihapus. Ini tidak dapat dibatalkan.", "Dihapus %1$d dari %2$d", "Anda tidak punya repost", "Dihentikan: %d dihapus"
         });
         TABLES.put("ar", new String[]{
                 "TiktokPatchXposed", "الموجز", "حظر الإعلانات", "الإعلانات في الموجز وعند بدء التشغيل وقوائم الفيديو الأخرى", "إخفاء البث المباشر",
@@ -757,7 +769,8 @@ final class I18n {
                 "إخفاء مشاهدات القصص المميزة", "لن يظهر اسمك لصاحب الملف الشخصي ضمن مشاهدي قصصه المميزة",
                 "تسجيل البث المباشر", "زر REC داخل البث المباشر يسجّل البث بالجودة التي تختارها في Movies/TikTok (MP4) أو ينسخ رابطه", "تسجيل هذا البث", "اختر الجودة", "نسخ رابط البث", "أفضل جودة، لفتحه في مشغّل مثل VLC", "لم يُعثر على البث بعد. انتظر حتى يبدأ تشغيل البث ثم اضغط REC مجدداً", "بدأ التسجيل. اضغط ■ لإيقافه", "تم حفظ تسجيل البث في Movies/TikTok", "تعذّر تسجيل هذا البث", "تم نسخ رابط البث",
                 "الدول", "إخفاء الدول", "الدولة التي حددها TikTok للحساب، كما يظهر في العلم. قد يعيش الشخص في مكان آخر. تبقى الفيديوهات التي بلا دولة.",
-                "بدون حد لطول التعليق", "اكتب تعليقات أطول مما يسمح به TikTok. قد يرفض خادم TikTok التعليق الطويل جدًا", "إخفاء الأشخاص المقترحين في البريد الوارد", "قسم الأشخاص الذين يقترحهم TikTok أسفل محادثاتك"
+                "بدون حد لطول التعليق", "اكتب تعليقات أطول مما يسمح به TikTok. قد يرفض خادم TikTok التعليق الطويل جدًا", "إخفاء الأشخاص المقترحين في البريد الوارد", "قسم الأشخاص الذين يقترحهم TikTok أسفل محادثاتك",
+                "إزالة كل إعادات النشر", "جارٍ عدّ إعادات النشر…", "ستتم إزالة %d من إعادات النشر. لا يمكن التراجع عن ذلك.", "تمت إزالة %1$d من %2$d", "لا توجد لديك إعادات نشر", "توقف: تمت إزالة %d"
         });
         TABLES.put("zh", new String[]{
                 "TiktokPatchXposed", "推荐", "屏蔽广告", "推荐流、启动时和其他视频列表中的广告", "隐藏直播", "推荐流中的直播和 LIVE 按钮", "隐藏“你可能认识的人”", "根据你的通讯录推荐的视频",
@@ -814,7 +827,8 @@ final class I18n {
                 "隐藏主页精选浏览记录", "作者不会在主页精选的观看者中看到你",
                 "录制直播", "直播间里的 REC 按钮按所选画质把直播录制到 Movies/TikTok（MP4），或复制直播流链接", "录制这场直播", "选择画质", "复制直播流链接", "最佳画质，可在 VLC 等播放器中打开", "尚未找到直播流。请等直播开始播放后再点 REC", "已开始录制。点 ■ 停止", "直播录像已保存到 Movies/TikTok", "无法录制这场直播", "已复制直播流链接",
                 "国家/地区", "隐藏国家/地区", "TikTok 为账号指定的国家/地区，与旗帜显示的一致，不一定是其实际居住地。没有国家/地区的视频会保留。",
-                "取消评论长度限制", "可以写超过 TikTok 限制的评论。TikTok 服务器仍可能拒绝过长的评论", "隐藏收件箱中的推荐用户", "TikTok 在聊天下方推荐的用户区块"
+                "取消评论长度限制", "可以写超过 TikTok 限制的评论。TikTok 服务器仍可能拒绝过长的评论", "隐藏收件箱中的推荐用户", "TikTok 在聊天下方推荐的用户区块",
+                "移除所有转发", "正在统计你的转发…", "将移除 %d 条转发。此操作无法撤销。", "已移除 %1$d / %2$d", "你没有转发", "已停止：移除了 %d 条"
         });
     }
 
