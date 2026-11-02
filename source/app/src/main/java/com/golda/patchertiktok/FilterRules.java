@@ -2,35 +2,54 @@ package com.golda.patchertiktok;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
- * The user's own feed filter: words or #hashtags, @authors, minimum likes and views.
+ * The user's own feed filter: words or #hashtags, @authors, minimum likes and views, countries.
  * Pure logic, so the matching can be tested without TikTok.
  */
 final class FilterRules {
-    static final FilterRules NONE = new FilterRules(Collections.emptyList(), Collections.emptyList(), 0, 0);
+    static final FilterRules NONE = new FilterRules(Collections.emptyList(), Collections.emptyList(), 0, 0, Collections.emptySet());
 
     private final List<String> words;
     private final List<String> authors;
     final long minLikes;
     final long minViews;
+    /** Lower-case ISO codes whose authors are hidden (#20). */
+    private final Set<String> countries;
 
-    private FilterRules(List<String> words, List<String> authors, long minLikes, long minViews) {
+    private FilterRules(List<String> words, List<String> authors, long minLikes, long minViews, Set<String> countries) {
         this.words = words;
         this.authors = authors;
         this.minLikes = minLikes;
         this.minViews = minViews;
+        this.countries = countries;
     }
 
     /** Entries are separated by commas or new lines; case does not matter. */
     static FilterRules parse(String words, String authors, long minLikes, long minViews) {
-        return new FilterRules(split(words, false), split(authors, true), Math.max(0, minLikes), Math.max(0, minViews));
+        return parse(words, authors, minLikes, minViews, null);
+    }
+
+    /** Countries are two-letter codes, separated the same way; anything else is ignored. */
+    static FilterRules parse(String words, String authors, long minLikes, long minViews, String countries) {
+        Set<String> codes = new HashSet<>();
+        for (String code : split(countries, false)) if (code.length() == 2) codes.add(code);
+        return new FilterRules(split(words, false), split(authors, true), Math.max(0, minLikes), Math.max(0, minViews), codes);
     }
 
     boolean isEmpty() {
-        return words.isEmpty() && authors.isEmpty() && minLikes == 0 && minViews == 0;
+        return words.isEmpty() && authors.isEmpty() && minLikes == 0 && minViews == 0 && countries.isEmpty();
+    }
+
+    boolean hasCountries() { return !countries.isEmpty(); }
+
+    /** Whether this region is on the list. An unknown region is not judged: the video stays. */
+    boolean hidesCountry(String region) {
+        return region != null && countries.contains(region.trim().toLowerCase(Locale.ROOT));
     }
 
     /**

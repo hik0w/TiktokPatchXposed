@@ -479,11 +479,13 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.PLAYBACK, S.GROUP_QUALITY, S.PHOTO_BEST, S.PHOTO_BEST_DESC, Prefs.PHOTO_BEST),
             new Setting(Category.INTERFACE, S.GROUP_COLORS, S.ACCENT, S.ACCENT_DESC, Prefs.ACCENT),
             new Setting(Category.INTERFACE, S.GROUP_COLORS, S.AMOLED, S.AMOLED_DESC, Prefs.AMOLED),
+            new Setting(Category.INTERFACE, S.GROUP_COLORS, S.CLASSIC_EMOJI, S.CLASSIC_EMOJI_DESC, Prefs.CLASSIC_EMOJI),
             new Setting(Category.INTERFACE, S.GROUP_SCREEN, S.BURN_IN, S.BURN_IN_DESC, Prefs.BURN_IN),
             new Setting(Category.INTERFACE, S.GROUP_SCREEN, S.KEEP_BRIGHTNESS, S.KEEP_BRIGHTNESS_DESC, Prefs.KEEP_BRIGHTNESS),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.NEW_PROFILE, S.NEW_PROFILE_DESC, Prefs.NEW_PROFILE),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.ACCOUNT_DATE, S.ACCOUNT_DATE_DESC, Prefs.ACCOUNT_DATE),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.HIDE_INBOX_STORIES, S.HIDE_INBOX_STORIES_DESC, Prefs.HIDE_INBOX_STORIES),
+            new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.HIDE_INBOX_SUGGESTED, S.HIDE_INBOX_SUGGESTED_DESC, Prefs.HIDE_INBOX_SUGGESTED),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.MESSAGE_TIME, S.MESSAGE_TIME_DESC, Prefs.MESSAGE_TIME),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.READ_ALL, S.READ_ALL_DESC, Prefs.READ_ALL),
             new Setting(Category.INTERFACE, S.GROUP_PROFILE, S.KEEP_UNSENT, S.KEEP_UNSENT_DESC, Prefs.KEEP_UNSENT),
@@ -494,6 +496,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SOCIAL, null, S.COMMENT_PHOTOS, S.COMMENT_PHOTOS_DESC, Prefs.COMMENT_PHOTOS),
             new Setting(Category.SOCIAL, null, S.AUTHOR_REGION, S.AUTHOR_REGION_DESC, Prefs.AUTHOR_REGION),
             new Setting(Category.SOCIAL, null, S.COMMENT_HANDLE, S.COMMENT_HANDLE_DESC, Prefs.COMMENT_HANDLE),
+            new Setting(Category.SOCIAL, null, S.COMMENT_NO_LIMIT, S.COMMENT_NO_LIMIT_DESC, Prefs.COMMENT_NO_LIMIT),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.NO_WATERMARK, null, Prefs.NO_WATERMARK),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.DOWNLOAD_ANY, S.DOWNLOAD_ANY_DESC, Prefs.DOWNLOAD_ANY),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.QUALITY_PICKER, S.QUALITY_PICKER_DESC, Prefs.QUALITY_PICKER),
@@ -502,6 +505,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.STORY_DOWNLOAD, S.STORY_DOWNLOAD_DESC, Prefs.STORY_DOWNLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.AVATAR_DOWNLOAD, S.AVATAR_DOWNLOAD_DESC, Prefs.AVATAR_DOWNLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.LIVE_RECORD, S.LIVE_RECORD_DESC, Prefs.LIVE_RECORD),
+            new Setting(Category.SHARING, S.GROUP_MEDIA, S.OFFLINE_MORE, S.OFFLINE_MORE_DESC, Prefs.OFFLINE_MORE),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.CHAT_STICKER, S.CHAT_STICKER_DESC, Prefs.CHAT_STICKER),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.HD_UPLOAD, S.HD_UPLOAD_DESC, Prefs.HD_UPLOAD),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.UPLOAD_ORIGINAL, S.UPLOAD_ORIGINAL_DESC, Prefs.UPLOAD_ORIGINAL),
@@ -604,8 +608,74 @@ public final class ModSettingsActivity extends Activity {
         LinearLayout report = row(help);
         texts(report, I18n.get(S.BUG_REPORT), I18n.get(S.BUG_REPORT_DESC));
         report.setOnClickListener(Safe.click("settings", view -> openSheet(reportSheet())));
+        navigation(help, I18n.get(S.REPOST_PURGE), null, view -> openSheet(purgeSheet()));
         navigation(help, I18n.get(S.RESET_ALL), null, view -> openSheet(resetSheet()));
         return page.root;
+    }
+
+    /** Counts the reposts first, then asks. Closing the sheet stops the removal. */
+    private View purgeSheet() {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout info = row(content);
+        info.setClickable(false);
+        info.setBackground(null);
+        TextView status = (TextView) texts(info, I18n.get(S.REPOST_PURGE), I18n.get(S.REPOST_PURGE_COUNTING)).getChildAt(1);
+        LinearLayout remove = row(content);
+        texts(remove, I18n.get(S.REPOST_PURGE), null);
+        remove.setVisibility(View.GONE);
+        LinearLayout cancel = row(content);
+        texts(cancel, getString(android.R.string.cancel), null);
+        cancel.setOnClickListener(Safe.click("settings", view -> closeSheet()));
+        android.content.Context app = getApplicationContext();
+        new Thread(Safe.run("repost cleaner", () -> {
+            java.util.List<RepostCleaner.Repost> reposts;
+            try {
+                reposts = RepostCleaner.list(app);
+            } catch (Exception error) {
+                RuntimeLog.log("repost cleaner: list failed, " + error);
+                runOnUiThread(Safe.run("repost cleaner", () -> status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_STOPPED), 0))));
+                return;
+            }
+            runOnUiThread(Safe.run("repost cleaner", () -> {
+                if (reposts.isEmpty()) {
+                    status.setText(I18n.get(S.REPOST_PURGE_NONE));
+                    return;
+                }
+                status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_CONFIRM), reposts.size()));
+                remove.setVisibility(View.VISIBLE);
+                remove.setOnClickListener(Safe.click("settings", view -> {
+                    remove.setVisibility(View.GONE);
+                    removeReposts(app, reposts, status);
+                }));
+            }));
+        }), "tpx-reposts").start();
+        return content;
+    }
+
+    private void removeReposts(android.content.Context app, java.util.List<RepostCleaner.Repost> reposts, TextView status) {
+        int total = reposts.size();
+        new Thread(Safe.run("repost cleaner", () -> {
+            int removed = 0;
+            try {
+                removed = RepostCleaner.remove(app, reposts, new RepostCleaner.Progress() {
+                    @Override public boolean wanted() { return status.isAttachedToWindow(); }
+
+                    @Override public void removed(int done) {
+                        runOnUiThread(Safe.run("repost cleaner", () ->
+                                status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_PROGRESS), done, total))));
+                    }
+                });
+            } catch (Exception error) {
+                RuntimeLog.log("repost cleaner: stopped, " + error);
+            }
+            int done = removed;
+            runOnUiThread(Safe.run("repost cleaner", () -> {
+                String text = String.format(locale, I18n.get(done == total ? S.REPOST_PURGE_PROGRESS : S.REPOST_PURGE_STOPPED), done, total);
+                status.setText(text);
+                android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_SHORT).show();
+            }));
+        }), "tpx-reposts").start();
     }
 
     /** Asks before putting every setting back to its default (idea by RSR1337, PR #14). */
@@ -735,7 +805,7 @@ public final class ModSettingsActivity extends Activity {
             {"resume position", "RESUME_POSITION"}, {"playback speed", "REMEMBER_SPEED"}, {"downloads plus", "QUALITY_PICKER"}, {"auto-scroll", "AUTO_SCROLL"}, {"comment media", "COMMENT_MEDIA"},
             {"comment copy", "COPY_COMMENT"}, {"external browser", "EXTERNAL_BROWSER"},
             {"interface", "HIDE_INBOX_STORIES"}, {"overlay", "OVERLAY_OPACITY"}, {"accent color", "ACCENT"},
-            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
+            {"seen videos", "HIDE_SEEN"}, {"author region", "AUTHOR_REGION"}, {"comment author", "COMMENT_HANDLE"}, {"comment limit", "COMMENT_NO_LIMIT"}, {"offline videos", "OFFLINE_MORE"}, {"exact time", "EXACT_TIME"}, {"exact counts", "EXACT_COUNTS"}, {"keep brightness", "KEEP_BRIGHTNESS"}, {"device checks", "HIDE_ROOT"}, {"playback quality", "PREFER_H264"}, {"photo quality", "PHOTO_BEST"}, {"trackers", "NO_TRACKERS"}, {"analytics", "NO_TIKTOK_ANALYTICS"}, {"comment translation", "AUTO_TRANSLATE"}, {"downloads", "NO_WATERMARK"}, {"clean links", "CLEAN_LINKS"},
             {"invisible mode", "SECTION_GHOST"}, {"region", "REGION"}, {"recommendation", "REGION_LANGUAGE"},
             {"A/B overrides", "EXTRA_FEATURES"}, {"auto streaks", "AUTO_STREAK"}, {"streak sticker", "STREAK_STICKER"},
             {"friend card", "ACQUAINTANCES"}, {"unmute", "UNMUTE"}, {"font", "FONT"}, {"privacy", "SECTION_PRIVACY"},
@@ -2133,18 +2203,10 @@ public final class ModSettingsActivity extends Activity {
             }
             PICTURE_CACHE.put(id, bytes);
             try {
-                int limit = dp(72);
-                android.graphics.drawable.Drawable picture = android.graphics.ImageDecoder.decodeDrawable(
-                        android.graphics.ImageDecoder.createSource(java.nio.ByteBuffer.wrap(bytes)),
-                        (decoder, info, source) -> {
-                            int width = info.getSize().getWidth();
-                            int height = info.getSize().getHeight();
-                            float scale = Math.min(1f, (float) limit / Math.max(width, height));
-                            decoder.setTargetSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
-                        });
+                android.graphics.drawable.Drawable picture = Build.VERSION.SDK_INT >= 28 ? decoded(bytes, dp(72)) : still(bytes);
                 runOnUiThread(() -> {
                     view.setImageDrawable(picture);
-                    if (picture instanceof android.graphics.drawable.AnimatedImageDrawable) {
+                    if (Build.VERSION.SDK_INT >= 28 && picture instanceof android.graphics.drawable.AnimatedImageDrawable) {
                         ((android.graphics.drawable.AnimatedImageDrawable) picture).start();
                     }
                 });
@@ -2153,6 +2215,25 @@ public final class ModSettingsActivity extends Activity {
                 file.delete();
             }
         }));
+    }
+
+    @android.annotation.TargetApi(28)
+    private static android.graphics.drawable.Drawable decoded(byte[] bytes, int limit) throws java.io.IOException {
+        return android.graphics.ImageDecoder.decodeDrawable(
+                android.graphics.ImageDecoder.createSource(java.nio.ByteBuffer.wrap(bytes)),
+                (decoder, info, source) -> {
+                    int width = info.getSize().getWidth();
+                    int height = info.getSize().getHeight();
+                    float scale = Math.min(1f, (float) limit / Math.max(width, height));
+                    decoder.setTargetSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
+                });
+    }
+
+    /** Android 8.1 has no ImageDecoder: a plain picture, the first frame of an animated one. */
+    private android.graphics.drawable.Drawable still(byte[] bytes) throws java.io.IOException {
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        if (bitmap == null) throw new java.io.IOException("not a picture");
+        return new android.graphics.drawable.BitmapDrawable(getResources(), bitmap);
     }
 
     private byte[] fetch(java.util.List<String> urls) {
@@ -2252,6 +2333,16 @@ public final class ModSettingsActivity extends Activity {
         textField(page.card(), Prefs.FILTER_WORDS, I18n.get(S.FILTER_WORDS_HINT));
         page.section(I18n.get(S.FILTER_AUTHORS));
         textField(page.card(), Prefs.FILTER_AUTHORS, I18n.get(S.FILTER_AUTHORS_HINT));
+        page.section(I18n.get(S.FILTER_COUNTRIES_SECTION));
+        TextView count = navigation(page.card(), I18n.get(S.FILTER_COUNTRIES), null, view -> push(countriesPage(), true));
+        LinearLayout flags = new LinearLayout(this);
+        flags.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout countryRow = (LinearLayout) count.getParent();
+        countryRow.addView(flags, countryRow.indexOfChild(count), new LinearLayout.LayoutParams(-2, -2));
+        Runnable sync = () -> showHiddenCountries(flags, count);
+        sync.run();
+        page.root.setTag(sync);
+        page.footer(I18n.get(S.FILTER_COUNTRIES_FOOTER));
         page.section(I18n.get(S.FILTER_MIN));
         LinearLayout minimum = page.card();
         numberRow(minimum, I18n.get(S.FILTER_MIN_LIKES), Prefs.FILTER_MIN_LIKES);
@@ -2372,9 +2463,8 @@ public final class ModSettingsActivity extends Activity {
         return regionPage(S.REGION, Prefs.region(), true, Prefs::setRegion);
     }
 
-    /** The country list; {@code withOff} adds "Off" on top. */
-    private View regionPage(S title, String selected, boolean withOff, java.util.function.Consumer<String> select) {
-        Page page = new Page(I18n.get(title), false);
+    /** The search box on top of a country list. */
+    private EditText searchField(Page page) {
         LinearLayout searchBox = new LinearLayout(this);
         searchBox.setGravity(Gravity.CENTER_VERTICAL);
         searchBox.setPadding(dp(12), 0, dp(12), 0);
@@ -2396,6 +2486,83 @@ public final class ModSettingsActivity extends Activity {
         LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(-1, dp(40));
         boxParams.setMargins(dp(16), dp(8), dp(16), dp(12));
         page.content.addView(searchBox, boxParams);
+        return search;
+    }
+
+    /** The countries the own filter hides, as saved. */
+    private static java.util.Set<String> hiddenCountries() {
+        java.util.Set<String> codes = new java.util.LinkedHashSet<>();
+        for (String code : Prefs.text(Prefs.FILTER_COUNTRIES).split(",")) {
+            if (!code.trim().isEmpty()) codes.add(code.trim().toLowerCase(Locale.ROOT));
+        }
+        return codes;
+    }
+
+    /** Countries to hide: any number can be ticked, so the page stays open; ticked ones come first. */
+    private View countriesPage() {
+        Page page = new Page(I18n.get(S.FILTER_COUNTRIES), false);
+        EditText search = searchField(page);
+        LinearLayout list = page.card();
+        java.util.Set<String> chosen = hiddenCountries();
+        List<Regions.Region> regions = new ArrayList<>(Regions.sorted(locale));
+        java.util.Collections.sort(regions, (a, b) -> Boolean.compare(chosen.contains(b.iso), chosen.contains(a.iso)));
+        List<View> rows = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        for (Regions.Region region : regions) {
+            String name = region.name(locale);
+            LinearLayout row = row(list);
+            row.setMinimumHeight(dp(52));
+            texts(row, name, null);
+            ImageView check = new ImageView(this);
+            check.setImageDrawable(new Glyph(Glyph.Kind.CHECK, palette.accent, dp(22)));
+            check.setVisibility(chosen.contains(region.iso) ? View.VISIBLE : View.INVISIBLE);
+            row.addView(check, new LinearLayout.LayoutParams(dp(22), dp(22)));
+            row.setOnClickListener(Safe.click("settings", view -> {
+                boolean on = !chosen.remove(region.iso);
+                if (on) chosen.add(region.iso);
+                check.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
+                Prefs.setText(Prefs.FILTER_COUNTRIES, TextUtils.join(",", chosen));
+            }));
+            String flag = RegionFlag.of(region.iso);
+            if (flag != null) leadingIcon(row, new FlagDot(flag, dp(22)));
+            rows.add(row);
+            names.add(name.toLowerCase(locale) + " " + region.iso + " " + region.name(Locale.ENGLISH).toLowerCase(Locale.ROOT));
+        }
+        search.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override public void afterTextChanged(Editable s) {
+                String query = s.toString().trim().toLowerCase(locale);
+                for (int index = 0; index < rows.size(); index++) {
+                    rows.get(index).setVisibility(names.get(index).contains(query) ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+        return page.root;
+    }
+
+    /** The first flags and the number of hidden countries, or "Off". */
+    private void showHiddenCountries(LinearLayout flags, TextView count) {
+        java.util.Set<String> chosen = hiddenCountries();
+        count.setText(chosen.isEmpty() ? I18n.get(S.OFF) : String.valueOf(chosen.size()));
+        flags.removeAllViews();
+        int shown = 0;
+        for (String iso : chosen) {
+            String flag = RegionFlag.of(iso);
+            if (flag == null) continue;
+            ImageView view = new ImageView(this);
+            view.setImageDrawable(new FlagDot(flag, dp(18)));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(18), dp(18));
+            if (shown > 0) params.setMarginStart(-dp(5));
+            flags.addView(view, params);
+            if (++shown == 3) break;
+        }
+    }
+
+    /** The country list; {@code withOff} adds "Off" on top. */
+    private View regionPage(S title, String selected, boolean withOff, java.util.function.Consumer<String> select) {
+        Page page = new Page(I18n.get(title), false);
+        EditText search = searchField(page);
 
         LinearLayout list = page.card();
         List<View> rows = new ArrayList<>();
@@ -2643,7 +2810,7 @@ public final class ModSettingsActivity extends Activity {
             Prefs.UNMUTE, Prefs.SELF_REPOST, Prefs.HD_UPLOAD, Prefs.GHOST_ONLINE, Prefs.GHOST_READ,
             Prefs.COMMENT_PHOTOS, Prefs.NO_HASHTAG_LIMIT, Prefs.CAMERA_EXTRAS, Prefs.HIDE_ROOT, Prefs.PIP_FEED,
             Prefs.PREFER_H264, Prefs.PHOTO_BEST, Prefs.NO_MOTION_SENSORS, Prefs.NO_TIKTOK_ANALYTICS, Prefs.UPLOAD_ORIGINAL,
-            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD};
+            Prefs.FEED_REGION_OWN, Prefs.KEEP_UNSENT, Prefs.NO_DOUBLE_TAP_LIKE, Prefs.ACCOUNT_DATE, Prefs.LIVE_RECORD, Prefs.COMMENT_NO_LIMIT, Prefs.CLASSIC_EMOJI, Prefs.OFFLINE_MORE};
 
     /**
      * A small mark after a row's title: an outlined "Beta" for settings under test, a plain

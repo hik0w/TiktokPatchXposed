@@ -10,7 +10,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * Shows the creator's country as a flag after the post date ("· 5 d 🇩🇪"): the author's region,
+ * Shows the creator's country as a flag after the post date ("· 5 d 🇩🇪"), or after the author's
+ * name where TikTok shows no date: the author's region,
  * or the video's when the author has none. The flag is set when the video on screen renders its
  * first frame and stays pinned: if TikTok rewrites the date, the flag comes back. On a profile, the account name gets the flag of that user's region while the name
  * shown is that user's.
@@ -62,6 +63,7 @@ final class AuthorRegion {
             });
             hooks++;
         }
+        RuntimeLog.log("author region: hooks=" + hooks);
     }
 
     private static boolean profileWanted() {
@@ -223,25 +225,61 @@ final class AuthorRegion {
         if (!(activity instanceof Activity) || pager == null) return;
         View root = ((Activity) activity).getWindow().getDecorView();
         if (id(root) < 0) return;
-        Runnable mark = () -> {
-            // Read the video again when drawing: the pager may have moved on since the event.
-            Object aweme;
-            Object feed;
-            try {
-                aweme = currentAweme.invoke(panel);
-                feed = pager.invoke(panel);
-            } catch (Throwable error) {
-                return;
-            }
-            String flag = RegionFlag.of(region(aweme));
-            // Only the feed's own pages: comments use the same date label id.
-            if (flag == null || !(feed instanceof View)) return;
-            TextView label = visibleLabel((View) feed);
-            if (label != null) pin(label, flag, null);
-        };
         // Now if the label is already bound, and once more after the pending layout pass.
-        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) mark.run();
-        root.post(Safe.run("author region", mark));
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) mark(panel, false);
+        root.post(Safe.run("author region", () -> mark(panel, true)));
+    }
+
+    private static void mark(Object panel, boolean laidOut) {
+        // Read the video again when drawing: the pager may have moved on since the event.
+        Object aweme;
+        Object feed;
+        try {
+            aweme = currentAweme.invoke(panel);
+            feed = pager.invoke(panel);
+        } catch (Throwable error) {
+            return;
+        }
+        String flag = RegionFlag.of(region(aweme));
+        // Only the feed's own pages: comments use the same date label id.
+        if (flag == null || !(feed instanceof View)) return;
+        TextView label = visibleLabel((View) feed);
+        if (label != null) {
+            pin(label, flag, null);
+            return;
+        }
+        if (!laidOut) return;
+        // Some TikTok versions and videos show no date line (#21): the author's name takes the flag.
+        Object author = Reflect.call(aweme, "getAuthor");
+        for (String getter : new String[]{"getNickname", "getUniqueId"}) {
+            Object value = Reflect.call(author, getter);
+            String name = value instanceof String ? ((String) value).trim() : "";
+            if (name.isEmpty()) continue;
+            TextView shown = visibleName((View) feed, name);
+            if (shown == null) continue;
+            pin(shown, flag, name);
+            return;
+        }
+    }
+
+    /** The label showing just this author's name, optionally with @, on the item fully on screen. */
+    private static TextView visibleName(View view, String name) {
+        if (view.getVisibility() != View.VISIBLE) return null;
+        if (view instanceof TextView) {
+            CharSequence text = ((TextView) view).getText();
+            String shown = text == null ? "" : RegionFlag.without(text.toString()).trim();
+            if (!shown.equals(name) && !shown.equals("@" + name)) return null;
+            Rect rect = new Rect();
+            return view.getGlobalVisibleRect(rect) && rect.height() > 0 ? (TextView) view : null;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int index = 0; index < group.getChildCount(); index++) {
+                TextView found = visibleName(group.getChildAt(index), name);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 
     private static String region(Object aweme) {
