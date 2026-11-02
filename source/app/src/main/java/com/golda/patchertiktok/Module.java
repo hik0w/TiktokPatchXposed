@@ -36,6 +36,7 @@ final class Module {
             run("comment media", () -> CommentMedia.install(loader));
             run("external browser", () -> ExternalLinks.install(loader));
             run("interface", () -> InterfaceTweaks.install(loader));
+            run("comment limit", () -> CommentLimit.install(loader));
             run("overlay", () -> Overlay.install(loader));
             run("author region", () -> AuthorRegion.install(loader));
             run("LIVE button", () -> LiveButton.install(loader));
@@ -98,6 +99,7 @@ final class Module {
         run("code index", () -> Discovery.init(app));
         run("friend card", () -> FeedFilter.installCardInsertion(loader));
         run("seen videos", () -> SeenVideos.install(app, loader));
+        run("stories seen", () -> StoriesSeen.install(app, loader));
         run("unmute", () -> Unmute.install(loader));
         run("hd upload", () -> HdUpload.install(loader));
         run("read receipts", () -> ReadReceipts.install(loader));
@@ -137,8 +139,10 @@ final class Module {
             DownloadsPlus.install(loader);
         });
         run("A/B overrides", () -> AbOverrides.install(loader));
+        run("offline videos", () -> OfflineMore.install(loader));
         run("startup ads", () -> StartupAds.install(loader));
         run("seekbar", () -> Seekbar.install(loader));
+        run("foreground", () -> Foreground.install(app));
         run("settings row", () -> SettingsEntry.install(app, loader));
         run("auto streaks", () -> AutoStreakManager.install(app, loader));
         run("code index release", Discovery::release);

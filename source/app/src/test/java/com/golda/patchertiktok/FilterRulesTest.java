@@ -9,6 +9,28 @@ import java.util.Collections;
 import org.junit.Test;
 
 public class FilterRulesTest {
+    @Test public void countriesMatchTheRegionIgnoringCase() {
+        FilterRules rules = FilterRules.parse("", "", 0, 0, "CN, in\nbad-code");
+        assertFalse(rules.isEmpty());
+        assertTrue(rules.hasCountries());
+        assertTrue(rules.hidesCountry("cn"));
+        assertTrue(rules.hidesCountry(" IN "));
+        assertFalse(rules.hidesCountry("de"));
+    }
+
+    @Test public void videosWithoutARegionStay() {
+        FilterRules rules = FilterRules.parse("", "", 0, 0, "cn");
+        assertFalse(rules.hidesCountry(null));
+        assertFalse(rules.hidesCountry(""));
+    }
+
+    @Test public void noCountriesMeansNoCountryRule() {
+        FilterRules rules = FilterRules.parse("", "", 0, 0, "  ");
+        assertTrue(rules.isEmpty());
+        assertFalse(rules.hasCountries());
+        assertFalse(FilterRules.NONE.hidesCountry("cn"));
+    }
+
     @Test public void emptyRulesHideNothing() {
         FilterRules rules = FilterRules.parse(" , \n", "", 0, 0);
         assertTrue(rules.isEmpty());

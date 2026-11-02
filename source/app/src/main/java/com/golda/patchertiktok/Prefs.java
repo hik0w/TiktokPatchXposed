@@ -81,6 +81,8 @@ final class Prefs {
     static final String CUSTOM_FILTER = "custom_filter";
     static final String FILTER_WORDS = "filter_words";
     static final String FILTER_AUTHORS = "filter_authors";
+    /** Comma-separated ISO codes of countries whose authors the own filter hides. */
+    static final String FILTER_COUNTRIES = "filter_countries";
     static final String FILTER_MIN_LIKES = "filter_min_likes";
     static final String FILTER_MIN_VIEWS = "filter_min_views";
     static final String REMEMBER_CLEAN = "remember_clean_screen";
@@ -89,6 +91,10 @@ final class Prefs {
     static final String COPY_COMMENT_TEXT = "copy_comment_text";
     static final String EXTERNAL_BROWSER = "external_browser";
     static final String HIDE_INBOX_STORIES = "hide_inbox_stories";
+    static final String HIDE_INBOX_SUGGESTED = "hide_inbox_suggested";
+    static final String COMMENT_NO_LIMIT = "comment_no_limit";
+    static final String CLASSIC_EMOJI = "classic_emoji";
+    static final String OFFLINE_MORE = "offline_more";
     static final String ACCENT = "accent_enabled";
     static final String ACCENT_COLOR = "accent_color";
     static final long DEFAULT_ACCENT = 0x8B5CF6;
@@ -162,7 +168,7 @@ final class Prefs {
     static final String DEFAULT_REGION = "de";
 
     /** Keys whose hooks only take effect when TikTok starts. */
-    static final String[] RESTART_KEYS = {COMMENT_REPOSTS, NEW_PROFILE, EXTRA_FEATURES, REGION, REGION_LANGUAGE, FEED_REGION_OWN, ADS, HIDE_INBOX_STORIES, ACCENT, AMOLED, SPOOF_ANDROID_ID, SELF_REPOST, FONT,
+    static final String[] RESTART_KEYS = {COMMENT_REPOSTS, NEW_PROFILE, EXTRA_FEATURES, REGION, REGION_LANGUAGE, FEED_REGION_OWN, ADS, HIDE_INBOX_STORIES, HIDE_INBOX_SUGGESTED, COMMENT_NO_LIMIT, CLASSIC_EMOJI, OFFLINE_MORE, ACCENT, AMOLED, SPOOF_ANDROID_ID, SELF_REPOST, FONT,
             COMMENT_PHOTOS, NO_HASHTAG_LIMIT, SPEED_3X, CAMERA_EXTRAS, PIP_FEED, HIDE_PASSKEY, NO_MOTION_SENSORS, NO_TRACKERS, UPLOAD_ORIGINAL};
 
     private static final Map<String, Boolean> DEFAULTS = new ConcurrentHashMap<>();
@@ -219,6 +225,10 @@ final class Prefs {
         DEFAULTS.put(COPY_COMMENT_TEXT, true);
         DEFAULTS.put(EXTERNAL_BROWSER, true);
         DEFAULTS.put(HIDE_INBOX_STORIES, false);
+        DEFAULTS.put(HIDE_INBOX_SUGGESTED, false);
+        DEFAULTS.put(COMMENT_NO_LIMIT, false);
+        DEFAULTS.put(CLASSIC_EMOJI, false);
+        DEFAULTS.put(OFFLINE_MORE, false);
         DEFAULTS.put(ACCENT, false);
         DEFAULTS.put(BURN_IN, false);
         DEFAULTS.put(AUTHOR_REGION, false);
@@ -284,7 +294,7 @@ final class Prefs {
         }
         region = Regions.normalize(loaded.getString(REGION, DEFAULT_REGION));
         oldVideoDays = Math.max(1, loaded.getInt(OLD_VIDEO_DAYS, DEFAULT_OLD_VIDEO_DAYS));
-        for (String key : new String[]{FILTER_WORDS, FILTER_AUTHORS, SPEEDS, TRANSLATE_EXCLUDE, STREAK_STICKER,
+        for (String key : new String[]{FILTER_WORDS, FILTER_AUTHORS, FILTER_COUNTRIES, SPEEDS, TRANSLATE_EXCLUDE, STREAK_STICKER,
                 STREAK_STICKER_TITLE, STREAK_STICKER_URL, STREAK_EXCLUDED, ANDROID_ID, FONT_SOURCE, FONT_FILE, FEED_REGION}) TEXTS.put(key, loaded.getString(key, ""));
         for (String key : new String[]{FILTER_MIN_LIKES, FILTER_MIN_VIEWS}) NUMBERS.put(key, loaded.getLong(key, 0));
         NUMBERS.put(ACCENT_COLOR, loaded.getLong(ACCENT_COLOR, DEFAULT_ACCENT));
@@ -298,7 +308,7 @@ final class Prefs {
     }
 
     /** Text strings, numbers and the region, besides the switches in {@link #DEFAULTS}. */
-    private static final String[] TEXT_KEYS = {REGION, FILTER_WORDS, FILTER_AUTHORS, SPEEDS, TRANSLATE_EXCLUDE,
+    private static final String[] TEXT_KEYS = {REGION, FILTER_WORDS, FILTER_AUTHORS, FILTER_COUNTRIES, SPEEDS, TRANSLATE_EXCLUDE,
             STREAK_STICKER, STREAK_STICKER_TITLE, STREAK_STICKER_URL, STREAK_EXCLUDED, FEED_REGION};
     private static final String[] LONG_KEYS = {FILTER_MIN_LIKES, FILTER_MIN_VIEWS, ACCENT_COLOR, OVERLAY_OPACITY, REFRESH_RATE, HD_BITRATE, STREAK_TIME, QUALITY_WIFI, QUALITY_MOBILE};
 
@@ -459,7 +469,7 @@ final class Prefs {
 
     private static void rebuildRules() {
         rules = FilterRules.parse(text(FILTER_WORDS), text(FILTER_AUTHORS),
-                number(FILTER_MIN_LIKES), number(FILTER_MIN_VIEWS));
+                number(FILTER_MIN_LIKES), number(FILTER_MIN_VIEWS), text(FILTER_COUNTRIES));
     }
 
     static String snapshot() {

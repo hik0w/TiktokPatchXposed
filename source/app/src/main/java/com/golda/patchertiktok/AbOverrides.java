@@ -77,6 +77,12 @@ final class AbOverrides {
             VALUES.put("studio_publish_hashtag_max_limit", 999);
         }
         if (Prefs.on(Prefs.SPEED_3X)) VALUES.put("feed_support_3x_speed", true);
+        // TikTok rolls its own emoji set out per place; off, each place goes back to the classic ones.
+        if (Prefs.on(Prefs.CLASSIC_EMOJI)) {
+            for (String key : new String[]{"tt_cmt_new_emoji", "tt_im_new_emoji", "tt_repost_new_emoji", "im_story_use_new_emoji"}) {
+                VALUES.put(key, 0);
+            }
+        }
         // Without this experiment TikTok draws the older comment cells, which have no translate
         // button at all. With it, each foreign comment gets TikTok's own one; style 2 adds the
         // "translate all" button left of the panel's close X. Nothing translates until tapped.

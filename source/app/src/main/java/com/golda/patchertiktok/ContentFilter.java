@@ -53,9 +53,17 @@ final class ContentFilter {
             views = number(Reflect.call(statistics, "getPlayCount"));
         }
         Object author = Reflect.call(aweme, "getAuthor");
+        if (rules.hasCountries() && rules.hidesCountry(region(author, aweme))) return true;
         String username = author == null ? null : string(Reflect.call(author, "getUniqueId"));
         String nickname = author == null ? null : string(Reflect.call(author, "getNickname"));
         return rules.hides(string(Reflect.call(aweme, "getDesc")), hashtags(aweme), username, nickname, likes, views);
+    }
+
+    /** The author's region, or the video's when the author has none, as the country flag shows it. */
+    private static String region(Object author, Object aweme) {
+        String region = author == null ? null : string(Reflect.call(author, "getRegion"));
+        if (region == null || region.length() != 2) region = string(Reflect.call(aweme, "getRegion"));
+        return region;
     }
 
     private static List<String> hashtags(Object aweme) {

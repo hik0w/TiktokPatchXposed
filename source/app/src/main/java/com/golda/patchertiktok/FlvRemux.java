@@ -155,7 +155,8 @@ final class FlvRemux {
                         lastVideo = dts;
                         int length = tag.size - video.offset;
                         if (length <= 0) continue;
-                        if (frame.length < length * 2 + 16) frame = new byte[length * 2 + 16];
+                        // Each 2-byte unit (1-byte length) can grow to 5 bytes with its start code.
+                        if (frame.length < length * 3 + 16) frame = new byte[length * 3 + 16];
                         int size = annexB(tag.data, video.offset, tag.size, videoConfig.lengthSize, frame);
                         if (size <= 0) continue;
                         info.set(0, size, Math.max(0, dts + video.cts - base) * 1000, video.key ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0);

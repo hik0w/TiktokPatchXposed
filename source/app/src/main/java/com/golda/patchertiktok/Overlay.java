@@ -25,6 +25,7 @@ final class Overlay {
      * TikTok's own components for the parts over a video, by the switch that hides them. Their
      * class names are readable, so each switch hides exactly its parts.
      */
+    private static final String DATE_LABEL = "tv_post_time";
     private static final String[][] COMPONENTS = {
             {FEED + "assem.avatar.FeedAvatarAssemWrap", "buttons"},
             {FEED + "assem.digg.VideoDiggAssem", "buttons"},
@@ -101,6 +102,7 @@ final class Overlay {
             refresh();
             schedule();
         })));
+        Foreground.listen(Overlay::schedule);
         RuntimeLog.log("overlay installed");
     }
 
@@ -156,11 +158,25 @@ final class Overlay {
         }
     }
 
+    /**
+     * The date beside the author's name belongs to no component of its own, so it would stay alone
+     * in mid-air once the name is hidden; it joins the name's part when found next to it.
+     */
+    private static void adoptDate(View view) {
+        if (!(view.getParent() instanceof android.view.ViewGroup)) return;
+        int id = view.getResources().getIdentifier(DATE_LABEL, "id", view.getContext().getPackageName());
+        View date = id == 0 ? null : ((android.view.ViewGroup) view.getParent()).findViewById(id);
+        if (date == null || date == view || PARTS.containsKey(date)) return;
+        PARTS.put(date, CAPTION);
+        date.getViewTreeObserver().addOnPreDrawListener(Safe.preDraw("overlay", () -> !enforce(date)));
+    }
+
     /** Applies the switch to one part; true when it was just hidden, so that frame is skipped. */
     private static boolean enforce(View view) {
         String kind = PARTS.get(view);
         if (kind == null) return false;
         boolean ours = OURS.containsKey(view);
+        if (CAPTION.equals(kind) && partWanted(kind)) adoptDate(view);
         if (partWanted(kind)) {
             if (view.getVisibility() != View.VISIBLE) return false;
             OURS.put(view, Boolean.TRUE);
@@ -335,7 +351,7 @@ final class Overlay {
         }
 
         private void step() {
-            if (!Prefs.on(Prefs.BURN_IN)) return;
+            if (!Prefs.on(Prefs.BURN_IN) || !Foreground.shown()) return;
             long now = SystemClock.uptimeMillis();
             if (!dimmed && dims() && now - lastTouch > IDLE_MS) {
                 dimmed = true;

@@ -161,10 +161,14 @@ final class BugReport {
     private static String trace(android.app.ApplicationExitInfo exit, boolean text) {
         try (java.io.InputStream in = exit.getTraceInputStream()) {
             if (in == null) return null;
-            byte[] data = new byte[text ? TRACE_LIMIT : 256 * 1024];
+            // A tombstone holds every thread and memory dumps, often a few megabytes; the crashing
+            // thread may be anywhere in it.
+            byte[] data = new byte[text ? TRACE_LIMIT : 8 * 1024 * 1024];
             int read = 0;
             for (int n; read < data.length && (n = in.read(data, read, data.length - read)) > 0; ) read += n;
             if (text) return new String(data, 0, read, StandardCharsets.UTF_8);
+            String crash = Tombstone.read(data, read);
+            if (crash != null) return crash;
             StringBuilder words = new StringBuilder();
             int start = -1;
             for (int i = 0; i <= read && words.length() < TRACE_LIMIT; i++) {
