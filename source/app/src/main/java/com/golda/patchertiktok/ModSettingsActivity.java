@@ -496,6 +496,8 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SOCIAL, null, S.SELF_REPOST, S.SELF_REPOST_DESC, Prefs.SELF_REPOST),
             new Setting(Category.SOCIAL, null, S.COMMENT_PHOTOS, S.COMMENT_PHOTOS_DESC, Prefs.COMMENT_PHOTOS),
             new Setting(Category.SOCIAL, null, S.AUTHOR_REGION, S.AUTHOR_REGION_DESC, Prefs.AUTHOR_REGION),
+            new Setting(Category.SOCIAL, null, S.REGION_DETAILS, S.REGION_DETAILS_DESC, Prefs.REGION_DETAILS),
+            new Setting(Category.SOCIAL, null, S.COMMENT_REGION, S.COMMENT_REGION_DESC, Prefs.COMMENT_REGION),
             new Setting(Category.SOCIAL, null, S.COMMENT_HANDLE, S.COMMENT_HANDLE_DESC, Prefs.COMMENT_HANDLE),
             new Setting(Category.SOCIAL, null, S.COMMENT_NO_LIMIT, S.COMMENT_NO_LIMIT_DESC, Prefs.COMMENT_NO_LIMIT),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.NO_WATERMARK, null, Prefs.NO_WATERMARK),

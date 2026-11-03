@@ -10,7 +10,7 @@ import android.graphics.drawable.Drawable;
 
 /** Small stroke icons drawn in code, sized on a 24-unit grid like TikTok's icons. */
 final class Glyph extends Drawable {
-    enum Kind { BACK, CHEVRON, CHECK, SEARCH, FEED, PLAY, PALETTE, DOWNLOAD, COMMENT, GLOBE, GHOST, FLAME, INFO, NOTE, IMAGE, SCROLL, FLASK, PERSON }
+    enum Kind { BACK, CHEVRON, CHECK, SEARCH, FEED, PLAY, PALETTE, DOWNLOAD, COMMENT, GLOBE, GHOST, FLAME, INFO, NOTE, IMAGE, SCROLL, FLASK, PERSON, TEXT }
 
     private final Kind kind;
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -124,6 +124,15 @@ final class Glyph extends Drawable {
                 path.lineTo(19f, 15.5f);
                 path.addCircle(6.5f, 17.5f, 2.5f, Path.Direction.CW);
                 path.addCircle(16.5f, 15.5f, 2.5f, Path.Direction.CW);
+                break;
+            case TEXT:
+                paint.setStrokeWidth(2f);
+                path.moveTo(4.5f, 6.5f);
+                path.lineTo(19.5f, 6.5f);
+                path.moveTo(4.5f, 12f);
+                path.lineTo(19.5f, 12f);
+                path.moveTo(4.5f, 17.5f);
+                path.lineTo(13.5f, 17.5f);
                 break;
             case COMMENT:
                 paint.setStrokeWidth(2f);

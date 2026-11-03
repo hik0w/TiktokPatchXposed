@@ -73,18 +73,32 @@ final class CommentAuthor {
             // No row.
         }
         if (!(row instanceof ViewGroup)) return;
-        Object user = Reflect.call(comment(cell), "getUser");
+        Object comment = comment(cell);
+        Object user = Reflect.call(comment, "getUser");
         Object nickname = Reflect.call(user, "getNickname");
         if (!(nickname instanceof String) || ((String) nickname).isEmpty()) return;
-        String flag = Prefs.on(Prefs.AUTHOR_REGION) ? RegionFlag.of(region(user)) : null;
+        String code = Prefs.on(Prefs.AUTHOR_REGION) ? region(user) : null;
+        if (code == null && Prefs.on(Prefs.AUTHOR_REGION) && Prefs.on(Prefs.COMMENT_REGION)) lookUp(cell, user);
+        String flag = RegionFlag.of(code);
         Object handle = Prefs.on(Prefs.COMMENT_HANDLE) ? Reflect.call(user, "getUniqueId") : null;
         String at = handle instanceof String && !((String) handle).isEmpty() && !handle.equals(nickname) ? "@" + handle : null;
         ViewGroup view = (ViewGroup) row;
         // TikTok can style the name a moment after the bind; mark it then.
         view.post(Safe.run("comment author", () -> {
             TextView name = nameLabel(view, (String) nickname);
-            if (name != null) mark(name, at, flag);
+            if (name == null) return;
+            if (flag != null) RegionCard.attach(name, code, user, null, comment);
+            mark(name, at, flag);
         }));
+    }
+
+    private static void lookUp(Object cell, Object user) {
+        Object handle = Reflect.call(user, "getUniqueId");
+        Object uid = Reflect.call(user, "getUid");
+        Object secUid = Reflect.call(user, "getSecUid");
+        if (!(handle instanceof String) || !(secUid instanceof String)) return;
+        RegionLookup.request(cell.getClass().getClassLoader(), (String) handle, uid instanceof String ? (String) uid : null,
+                (String) secUid, () -> bound(cell));
     }
 
     private static Object comment(Object cell) {
@@ -149,6 +163,8 @@ final class CommentAuthor {
             if (value instanceof String && ((String) value).length() == 2) return (String) value;
         }
         Object handle = Reflect.call(user, "getUniqueId");
-        return handle instanceof String ? AuthorRegion.seen((String) handle) : null;
+        if (!(handle instanceof String)) return null;
+        String seen = AuthorRegion.seen((String) handle);
+        return seen != null || !Prefs.on(Prefs.COMMENT_REGION) ? seen : RegionLookup.found((String) handle);
     }
 }

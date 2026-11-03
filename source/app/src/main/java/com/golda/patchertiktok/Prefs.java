@@ -102,6 +102,8 @@ final class Prefs {
     static final String OVERLAY_OPACITY = "overlay_opacity";
     static final String BURN_IN = "burn_in_protection";
     static final String AUTHOR_REGION = "author_region";
+    static final String REGION_DETAILS = "region_details";
+    static final String COMMENT_REGION = "comment_region_lookup";
     static final String COMMENT_HANDLE = "comment_handle";
     static final String KEEP_BRIGHTNESS = "keep_brightness";
     static final String EXACT_TIME = "exact_time";
@@ -235,6 +237,8 @@ final class Prefs {
         DEFAULTS.put(ACCENT, false);
         DEFAULTS.put(BURN_IN, false);
         DEFAULTS.put(AUTHOR_REGION, false);
+        DEFAULTS.put(REGION_DETAILS, false);
+        DEFAULTS.put(COMMENT_REGION, false);
         DEFAULTS.put(COMMENT_HANDLE, false);
         DEFAULTS.put(KEEP_BRIGHTNESS, false);
         DEFAULTS.put(EXACT_TIME, false);
