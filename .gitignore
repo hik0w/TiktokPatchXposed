@@ -33,3 +33,6 @@ hs_err_pid*
 
 # Local test leftovers
 /test-ttmod-settings.xml
+
+# Local assistant notes
+/.trail/

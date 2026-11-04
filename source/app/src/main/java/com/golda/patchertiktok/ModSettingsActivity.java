@@ -423,6 +423,7 @@ public final class ModSettingsActivity extends Activity {
         GHOST(S.SECTION_PRIVACY, Glyph.Kind.GHOST, 0xFF6B7280),
         REGION(S.SECTION_REGION, Glyph.Kind.GLOBE, 0xFF1FA2FF),
         STREAKS(S.SECTION_STREAKS, Glyph.Kind.FLAME, 0xFFFF6A2B),
+        ACCOUNT(S.SECTION_ACCOUNT, Glyph.Kind.PERSON, 0xFFEC4899),
         LAB(S.SECTION_LAB, Glyph.Kind.FLASK, 0xFF6B7280);
 
         final S title;
@@ -608,74 +609,282 @@ public final class ModSettingsActivity extends Activity {
         LinearLayout report = row(help);
         texts(report, I18n.get(S.BUG_REPORT), I18n.get(S.BUG_REPORT_DESC));
         report.setOnClickListener(Safe.click("settings", view -> openSheet(reportSheet())));
-        navigation(help, I18n.get(S.REPOST_PURGE), null, view -> openSheet(purgeSheet()));
         navigation(help, I18n.get(S.RESET_ALL), null, view -> openSheet(resetSheet()));
         return page.root;
     }
 
-    /** Counts the reposts first, then asks. Closing the sheet stops the removal. */
-    private View purgeSheet() {
+    private void accountTools(LinearLayout card) {
+        android.content.Context app = getApplicationContext();
+        navigation(card, I18n.get(S.FOLLOWERS_CHECK), null, view -> push(followersPage(), true));
+        navigation(card, I18n.get(S.REPOST_PURGE), null, view -> openSheet(purgeSheet(S.REPOST_PURGE, S.REPOST_PURGE_COUNTING,
+                S.REPOST_PURGE_CONFIRM, S.REPOST_PURGE_NONE, new Purge<RepostCleaner.Repost>() {
+                    @Override public List<RepostCleaner.Repost> list() throws Exception { return RepostCleaner.list(app); }
+
+                    @Override public int remove(List<RepostCleaner.Repost> items, RepostCleaner.Progress progress) throws Exception {
+                        return RepostCleaner.remove(app, items, progress);
+                    }
+                })));
+        navigation(card, I18n.get(S.LIKES_PURGE), null, view -> openSheet(purgeSheet(S.LIKES_PURGE, S.LIKES_PURGE_COUNTING,
+                S.LIKES_PURGE_CONFIRM, S.LIKES_PURGE_NONE, profilePurge(app, ProfileCleaner.Kind.LIKES))));
+        navigation(card, I18n.get(S.FAVORITES_PURGE), null, view -> openSheet(purgeSheet(S.FAVORITES_PURGE, S.FAVORITES_PURGE_COUNTING,
+                S.FAVORITES_PURGE_CONFIRM, S.FAVORITES_PURGE_NONE, profilePurge(app, ProfileCleaner.Kind.FAVORITES))));
+    }
+
+    private interface Purge<T> {
+        List<T> list() throws Exception;
+
+        int remove(List<T> items, RepostCleaner.Progress progress) throws Exception;
+    }
+
+    private Purge<String> profilePurge(android.content.Context app, ProfileCleaner.Kind kind) {
+        return new Purge<String>() {
+            @Override public List<String> list() throws Exception { return ProfileCleaner.list(app, kind); }
+
+            @Override public int remove(List<String> items, RepostCleaner.Progress progress) throws Exception {
+                return ProfileCleaner.remove(app, kind, items, progress);
+            }
+        };
+    }
+
+    /** Counts first, then asks. Closing the sheet stops the removal. */
+    private <T> View purgeSheet(S title, S counting, S confirm, S none, Purge<T> purge) {
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
         LinearLayout info = row(content);
         info.setClickable(false);
         info.setBackground(null);
-        TextView status = (TextView) texts(info, I18n.get(S.REPOST_PURGE), I18n.get(S.REPOST_PURGE_COUNTING)).getChildAt(1);
+        TextView status = (TextView) texts(info, I18n.get(title), I18n.get(counting)).getChildAt(1);
         LinearLayout remove = row(content);
-        texts(remove, I18n.get(S.REPOST_PURGE), null);
+        texts(remove, I18n.get(title), null);
         remove.setVisibility(View.GONE);
         LinearLayout cancel = row(content);
         texts(cancel, getString(android.R.string.cancel), null);
         cancel.setOnClickListener(Safe.click("settings", view -> closeSheet()));
         android.content.Context app = getApplicationContext();
-        new Thread(Safe.run("repost cleaner", () -> {
-            java.util.List<RepostCleaner.Repost> reposts;
+        new Thread(Safe.run("purge", () -> {
+            List<T> items;
             try {
-                reposts = RepostCleaner.list(app);
+                items = purge.list();
             } catch (Exception error) {
-                RuntimeLog.log("repost cleaner: list failed, " + error);
-                runOnUiThread(Safe.run("repost cleaner", () -> status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_STOPPED), 0))));
+                RuntimeLog.log("purge: list failed, " + error);
+                runOnUiThread(Safe.run("purge", () -> status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_STOPPED), 0))));
                 return;
             }
-            runOnUiThread(Safe.run("repost cleaner", () -> {
-                if (reposts.isEmpty()) {
-                    status.setText(I18n.get(S.REPOST_PURGE_NONE));
+            runOnUiThread(Safe.run("purge", () -> {
+                if (items.isEmpty()) {
+                    status.setText(I18n.get(none));
                     return;
                 }
-                status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_CONFIRM), reposts.size()));
+                status.setText(String.format(locale, I18n.get(confirm), items.size()));
                 remove.setVisibility(View.VISIBLE);
                 remove.setOnClickListener(Safe.click("settings", view -> {
                     remove.setVisibility(View.GONE);
-                    removeReposts(app, reposts, status);
+                    runPurge(app, purge, items, status);
                 }));
             }));
-        }), "tpx-reposts").start();
+        }), "tpx-purge").start();
         return content;
     }
 
-    private void removeReposts(android.content.Context app, java.util.List<RepostCleaner.Repost> reposts, TextView status) {
-        int total = reposts.size();
-        new Thread(Safe.run("repost cleaner", () -> {
+    private <T> void runPurge(android.content.Context app, Purge<T> purge, List<T> items, TextView status) {
+        int total = items.size();
+        new Thread(Safe.run("purge", () -> {
             int removed = 0;
             try {
-                removed = RepostCleaner.remove(app, reposts, new RepostCleaner.Progress() {
+                removed = purge.remove(items, new RepostCleaner.Progress() {
                     @Override public boolean wanted() { return status.isAttachedToWindow(); }
 
                     @Override public void removed(int done) {
-                        runOnUiThread(Safe.run("repost cleaner", () ->
+                        runOnUiThread(Safe.run("purge", () ->
                                 status.setText(String.format(locale, I18n.get(S.REPOST_PURGE_PROGRESS), done, total))));
                     }
                 });
             } catch (Exception error) {
-                RuntimeLog.log("repost cleaner: stopped, " + error);
+                RuntimeLog.log("purge: stopped, " + error);
             }
             int done = removed;
-            runOnUiThread(Safe.run("repost cleaner", () -> {
+            runOnUiThread(Safe.run("purge", () -> {
                 String text = String.format(locale, I18n.get(done == total ? S.REPOST_PURGE_PROGRESS : S.REPOST_PURGE_STOPPED), done, total);
                 status.setText(text);
                 android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_SHORT).show();
             }));
-        }), "tpx-reposts").start();
+        }), "tpx-purge").start();
+    }
+
+    private View followersPage() {
+        Page page = new Page(I18n.get(S.FOLLOWERS_CHECK), true);
+        android.content.Context app = getApplicationContext();
+        LinearLayout card = page.card();
+        LinearLayout info = row(card);
+        info.setClickable(false);
+        info.setBackground(null);
+        TextView status = (TextView) texts(info, I18n.get(S.FOLLOWERS_CHECK), " ").getChildAt(1);
+        LinearLayout check = row(card);
+        texts(check, I18n.get(S.FOLLOWERS_CHECK_NOW), null);
+        page.footer(I18n.get(S.FOLLOWERS_CHECK_DESC));
+        LinearLayout lists = new LinearLayout(this);
+        lists.setOrientation(LinearLayout.VERTICAL);
+        page.content.addView(lists, new LinearLayout.LayoutParams(-1, -2));
+        new Thread(Safe.run("unfollowers", () -> {
+            Unfollowers.Report saved = Unfollowers.saved(app);
+            runOnUiThread(Safe.run("unfollowers", () -> showFollowers(status, lists, saved)));
+        }), "tpx-unfollowers").start();
+        check.setOnClickListener(Safe.click("settings", view -> {
+            check.setEnabled(false);
+            check.setAlpha(0.4f);
+            status.setVisibility(View.VISIBLE);
+            status.setText(String.format(locale, I18n.get(S.FOLLOWERS_LOADING), 0));
+            new Thread(Safe.run("unfollowers", () -> {
+                Unfollowers.Report report;
+                try {
+                    report = Unfollowers.check(app, count -> runOnUiThread(Safe.run("unfollowers", () ->
+                            status.setText(String.format(locale, I18n.get(S.FOLLOWERS_LOADING), count)))));
+                } catch (Exception error) {
+                    RuntimeLog.log("unfollowers: check failed, " + error);
+                    report = null;
+                }
+                Unfollowers.Report done = report;
+                runOnUiThread(Safe.run("unfollowers", () -> {
+                    check.setEnabled(true);
+                    check.setAlpha(1f);
+                    if (done == null) {
+                        status.setText(I18n.get(S.FOLLOWERS_FAILED));
+                    } else {
+                        showFollowers(status, lists, done);
+                    }
+                }));
+            }), "tpx-unfollowers").start();
+        }));
+        return page.root;
+    }
+
+    private void showFollowers(TextView status, LinearLayout lists, Unfollowers.Report report) {
+        switch (report.outcome) {
+            case FIRST:
+                status.setText(String.format(locale, I18n.get(S.FOLLOWERS_FIRST), report.followers));
+                break;
+            case COMPARED:
+                status.setText(String.format(locale, I18n.get(S.FOLLOWERS_RESULT), dateTime(report.previous), report.left, report.joined));
+                break;
+            case INCOMPLETE:
+                status.setText(String.format(locale, I18n.get(S.FOLLOWERS_INCOMPLETE), report.got, report.expected));
+                break;
+            default:
+                status.setText(report.checked > 0 ? String.format(locale, I18n.get(S.FOLLOWERS_LAST), dateTime(report.checked)) : "");
+                break;
+        }
+        status.setVisibility(status.getText().length() > 0 ? View.VISIBLE : View.GONE);
+        lists.removeAllViews();
+        personList(lists, I18n.get(S.FOLLOWERS_UNFOLLOWED), report.history, true);
+        personList(lists, I18n.get(S.FOLLOWERS_NEW), report.joinedHistory, true);
+        suspectList(lists, report.suspects);
+        personList(lists, I18n.get(S.FOLLOWERS_NOT_BACK), report.notBack, false);
+    }
+
+    private void suspectList(LinearLayout parent, List<FollowerDiff.Suspect> suspects) {
+        if (suspects.isEmpty()) return;
+        section(parent, I18n.get(S.SUSPECTS) + " · " + String.format(locale, "%d", suspects.size()));
+        LinearLayout card = card(parent);
+        navigation(card, I18n.get(S.SUSPECTS_REVIEW), null, view -> push(suspectsPage(suspects), true));
+        int shown = Math.min(suspects.size(), 300);
+        for (int index = 0; index < shown; index++) {
+            FollowerDiff.Suspect suspect = suspects.get(index);
+            LinearLayout row = row(card);
+            texts(row, personName(suspect.person), suspectDetail(suspect));
+            openProfileOnClick(row, suspect.person.handle);
+        }
+    }
+
+    private View suspectsPage(List<FollowerDiff.Suspect> all) {
+        Page page = new Page(I18n.get(S.SUSPECTS_REMOVE), true);
+        List<FollowerDiff.Suspect> suspects = all.size() > 500 ? all.subList(0, 500) : all;
+        java.util.Set<String> kept = new java.util.HashSet<>();
+        LinearLayout actions = page.card();
+        LinearLayout remove = row(actions);
+        TextView label = (TextView) texts(remove, " ", null).getChildAt(0);
+        Runnable count = () -> label.setText(String.format(locale, I18n.get(S.SUSPECTS_REMOVE_SELECTED), suspects.size() - kept.size()));
+        count.run();
+        page.footer(I18n.get(S.SUSPECTS_FOOTER));
+        page.content.addView(new View(this), new LinearLayout.LayoutParams(-1, dp(12)));
+        LinearLayout list = page.card();
+        for (FollowerDiff.Suspect suspect : suspects) {
+            LinearLayout row = row(list);
+            texts(row, personName(suspect.person), suspectDetail(suspect));
+            ImageView box = new ImageView(this);
+            Runnable draw = () -> box.setImageDrawable(checkBox(!kept.contains(suspect.person.uid)));
+            draw.run();
+            row.addView(box, new LinearLayout.LayoutParams(dp(22), dp(22)));
+            row.setOnClickListener(Safe.click("settings", view -> {
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK);
+                if (!kept.remove(suspect.person.uid)) kept.add(suspect.person.uid);
+                draw.run();
+                count.run();
+            }));
+        }
+        android.content.Context app = getApplicationContext();
+        remove.setOnClickListener(Safe.click("settings", view -> {
+            List<FollowerDiff.Suspect> chosen = new ArrayList<>();
+            for (FollowerDiff.Suspect suspect : suspects) if (!kept.contains(suspect.person.uid)) chosen.add(suspect);
+            if (chosen.isEmpty()) {
+                android.widget.Toast.makeText(app, I18n.get(S.SUSPECTS_NONE), android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            openSheet(purgeSheet(S.SUSPECTS_REMOVE, S.SUSPECTS_REMOVE, S.SUSPECTS_REMOVE_CONFIRM, S.SUSPECTS_NONE,
+                    new Purge<FollowerDiff.Suspect>() {
+                        @Override public List<FollowerDiff.Suspect> list() { return chosen; }
+
+                        @Override public int remove(List<FollowerDiff.Suspect> items, RepostCleaner.Progress progress) throws Exception {
+                            return Unfollowers.removeFollowers(app, items, progress);
+                        }
+                    }));
+        }));
+        return page.root;
+    }
+
+    private String personName(FollowerDiff.Person person) {
+        if (!person.name.isEmpty()) return person.name;
+        return person.handle.isEmpty() ? person.uid : "@" + person.handle;
+    }
+
+    private String suspectDetail(FollowerDiff.Suspect suspect) {
+        String handle = suspect.person.handle.isEmpty() ? suspect.person.uid : "@" + suspect.person.handle;
+        if (suspect.videos < 0 || suspect.followers < 0 || suspect.following < 0) return handle;
+        return String.format(locale, I18n.get(S.SUSPECTS_DETAIL), handle, suspect.videos, suspect.followers, suspect.following);
+    }
+
+    private void personList(LinearLayout parent, String title, List<FollowerDiff.Person> people, boolean dated) {
+        if (people.isEmpty()) return;
+        section(parent, title + " · " + String.format(locale, "%d", people.size()));
+        LinearLayout card = card(parent);
+        int shown = Math.min(people.size(), 300);
+        for (int index = 0; index < shown; index++) {
+            FollowerDiff.Person person = people.get(index);
+            LinearLayout row = row(card);
+            String handle = person.handle.isEmpty() ? null : "@" + person.handle;
+            String detail = dated && person.time > 0 ? (handle == null ? dateTime(person.time) : handle + " · " + dateTime(person.time)) : handle;
+            texts(row, person.name.isEmpty() ? (handle == null ? person.uid : handle) : person.name, detail);
+            openProfileOnClick(row, person.handle);
+        }
+    }
+
+    private String dateTime(long millis) {
+        return java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT, locale)
+                .format(new java.util.Date(millis));
+    }
+
+    private void openProfileOnClick(LinearLayout row, String handle) {
+        if (handle == null || handle.isEmpty()) {
+            row.setClickable(false);
+            row.setBackground(null);
+            return;
+        }
+        row.setOnClickListener(Safe.click("settings", view -> {
+            Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tiktok.com/@" + Uri.encode(handle)));
+            open.setPackage(getPackageName());
+            try {
+                startActivity(open);
+            } catch (RuntimeException ignored) { }
+        }));
     }
 
     /** Asks before putting every setting back to its default (idea by RSR1337, PR #14). */
@@ -904,7 +1113,7 @@ public final class ModSettingsActivity extends Activity {
             value.setGravity(Gravity.CENTER_VERTICAL);
             value.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             row.addView(value);
-        } else {
+        } else if (category != Category.ACCOUNT) {
             meter = new Meter(this, palette.textPrimary, palette.textSecondary, palette.pressed);
             row.addView(meter);
         }
@@ -948,6 +1157,9 @@ public final class ModSettingsActivity extends Activity {
 
     private String categorySummary(Category category) {
         if (category == Category.REGION) return regionLabel();
+        if (category == Category.ACCOUNT) {
+            return String.join(", ", I18n.get(S.FOLLOWERS_CHECK), I18n.get(S.REPOST_PURGE), I18n.get(S.LIKES_PURGE), I18n.get(S.FAVORITES_PURGE));
+        }
         int total = 0;
         int enabled = 0;
         for (Setting setting : SETTINGS) {
@@ -984,6 +1196,10 @@ public final class ModSettingsActivity extends Activity {
         Page page = new Page(I18n.get(category.title), true);
         if (category == Category.REGION) {
             buildRegion(page, page.card());
+            return page.root;
+        }
+        if (category == Category.ACCOUNT) {
+            accountTools(page.card());
             return page.root;
         }
         if (category == Category.STREAKS) {
@@ -1570,26 +1786,6 @@ public final class ModSettingsActivity extends Activity {
             closeSheet();
             copySettings();
         }));
-        return content;
-    }
-
-    private View resetSheet() {
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout info = row(content);
-        info.setClickable(false);
-        info.setBackground(null);
-        texts(info, I18n.get(S.RESET_CONFIRM), I18n.get(S.RESET_CONFIRM_TEXT));
-        LinearLayout reset = row(content);
-        ((TextView) texts(reset, I18n.get(S.RESET_ALL), null).getChildAt(0)).setTextColor(0xFFFE2C55);
-        reset.setOnClickListener(view -> {
-            closeSheet();
-            Prefs.reset();
-            android.widget.Toast.makeText(this, I18n.get(S.RESET_DONE), android.widget.Toast.LENGTH_SHORT).show();
-        });
-        LinearLayout cancel = row(content);
-        texts(cancel, getString(android.R.string.cancel), null);
-        cancel.setOnClickListener(view -> closeSheet());
         return content;
     }
 
@@ -2407,6 +2603,17 @@ public final class ModSettingsActivity extends Activity {
      * A group of rows: one quiet card with hairlines between its rows, so a switch always sits
      * inside a shape rather than floating on the page.
      */
+    private void section(LinearLayout parent, String title) {
+        TextView header = new TextView(this);
+        header.setText(title);
+        header.setTextColor(palette.textTertiary);
+        header.setTextSize(12.5f);
+        header.setTypeface(Fonts.regular(this));
+        header.setPadding(dp(34), dp(24), dp(34), dp(8));
+        if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
+        parent.addView(header);
+    }
+
     private LinearLayout card(LinearLayout parent) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
@@ -3001,16 +3208,7 @@ public final class ModSettingsActivity extends Activity {
             });
         }
 
-        void section(String title) {
-            TextView header = new TextView(ModSettingsActivity.this);
-            header.setText(title);
-            header.setTextColor(palette.textTertiary);
-            header.setTextSize(12.5f);
-            header.setTypeface(Fonts.regular(ModSettingsActivity.this));
-            header.setPadding(dp(34), dp(24), dp(34), dp(8));
-            if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
-            content.addView(header);
-        }
+        void section(String title) { ModSettingsActivity.this.section(content, title); }
 
         LinearLayout card() { return ModSettingsActivity.this.card(content); }
 

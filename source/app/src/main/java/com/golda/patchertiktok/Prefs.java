@@ -357,19 +357,6 @@ final class Prefs {
         return true;
     }
 
-    static synchronized void reset() {
-        SharedPreferences current = preferences;
-        if (current == null) return;
-        SharedPreferences.Editor editor = current.edit();
-        for (String key : DEFAULTS.keySet()) editor.remove(key);
-        for (String key : TEXT_KEYS) editor.remove(key);
-        for (String key : LONG_KEYS) editor.remove(key);
-        editor.remove(OLD_VIDEO_DAYS).remove(FONT_SOURCE).remove(FONT_FILE);
-        editor.commit();
-        read(current);
-        notifyChanged();
-    }
-
     /** True when a setting that is applied only at startup differs from the running process. */
     static boolean restartPending() {
         return startSnapshot != null && !startSnapshot.equals(snapshot());
