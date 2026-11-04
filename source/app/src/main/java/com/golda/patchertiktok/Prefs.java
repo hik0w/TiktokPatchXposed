@@ -63,7 +63,7 @@ final class Prefs {
     static final String READ_ON_REPLY = "ghost_read_on_reply";
     /** The sent time under each chat message. */
     static final String MESSAGE_TIME = "message_time";
-    /** Hide recommended videos published longer ago than {@link #oldVideoDays()}. */
+    /** Hide recommended videos published longer ago than {@link #oldVideoSeconds()}. */
     static final String OLD_VIDEOS = "hide_old_videos";
     /** Leave videos already watched out of For You when TikTok sends them again. */
     static final String HIDE_SEEN = "hide_seen_videos";
@@ -73,6 +73,7 @@ final class Prefs {
     /** A REC button in LIVE rooms. Idea and first version by RSR1337 (PR #16). */
     static final String LIVE_RECORD = "live_record";
     static final String OLD_VIDEO_DAYS = "old_video_days";
+    static final String OLD_VIDEO_HOURS = "old_video_hours";
     static final int DEFAULT_OLD_VIDEO_DAYS = 90;
     /** Paid content, shop/product videos and search ads. */
     static final String PROMO = "hide_promo";
@@ -103,7 +104,6 @@ final class Prefs {
     static final String BURN_IN = "burn_in_protection";
     static final String AUTHOR_REGION = "author_region";
     static final String REGION_DETAILS = "region_details";
-    static final String COMMENT_REGION = "comment_region_lookup";
     static final String COMMENT_HANDLE = "comment_handle";
     static final String KEEP_BRIGHTNESS = "keep_brightness";
     static final String EXACT_TIME = "exact_time";
@@ -182,6 +182,7 @@ final class Prefs {
     private static volatile SharedPreferences preferences;
     private static volatile String region = DEFAULT_REGION;
     private static volatile int oldVideoDays = DEFAULT_OLD_VIDEO_DAYS;
+    private static volatile int oldVideoHours;
     private static final Map<String, String> TEXTS = new ConcurrentHashMap<>();
     private static final Map<String, Long> NUMBERS = new ConcurrentHashMap<>();
     private static volatile FilterRules rules = FilterRules.NONE;
@@ -238,7 +239,6 @@ final class Prefs {
         DEFAULTS.put(BURN_IN, false);
         DEFAULTS.put(AUTHOR_REGION, false);
         DEFAULTS.put(REGION_DETAILS, false);
-        DEFAULTS.put(COMMENT_REGION, false);
         DEFAULTS.put(COMMENT_HANDLE, false);
         DEFAULTS.put(KEEP_BRIGHTNESS, false);
         DEFAULTS.put(EXACT_TIME, false);
@@ -301,6 +301,7 @@ final class Prefs {
         }
         region = Regions.normalize(loaded.getString(REGION, DEFAULT_REGION));
         oldVideoDays = Math.max(1, loaded.getInt(OLD_VIDEO_DAYS, DEFAULT_OLD_VIDEO_DAYS));
+        oldVideoHours = Math.max(0, loaded.getInt(OLD_VIDEO_HOURS, 0));
         for (String key : new String[]{FILTER_WORDS, FILTER_AUTHORS, FILTER_COUNTRIES, SPEEDS, TRANSLATE_EXCLUDE, STREAK_STICKER,
                 STREAK_STICKER_TITLE, STREAK_STICKER_URL, STREAK_EXCLUDED, ANDROID_ID, FONT_SOURCE, FONT_FILE, FEED_REGION,
                 DOWNLOAD_NAME, DOWNLOAD_FOLDER}) TEXTS.put(key, loaded.getString(key, ""));
@@ -332,6 +333,7 @@ final class Prefs {
             for (String key : TEXT_KEYS) if (!REGION.equals(key)) json.put(key, text(key));
             for (String key : LONG_KEYS) json.put(key, number(key));
             json.put(OLD_VIDEO_DAYS, oldVideoDays);
+            json.put(OLD_VIDEO_HOURS, oldVideoHours);
         } catch (org.json.JSONException ignored) {
             // Keys and values are plain; this does not happen.
         }
@@ -360,6 +362,7 @@ final class Prefs {
         for (String key : TEXT_KEYS) if (json.has(key)) editor.putString(key, json.optString(key));
         for (String key : LONG_KEYS) if (json.has(key)) editor.putLong(key, json.optLong(key));
         if (json.has(OLD_VIDEO_DAYS)) editor.putInt(OLD_VIDEO_DAYS, Math.max(1, json.optInt(OLD_VIDEO_DAYS)));
+        if (json.has(OLD_VIDEO_HOURS)) editor.putInt(OLD_VIDEO_HOURS, Math.max(0, json.optInt(OLD_VIDEO_HOURS)));
         editor.commit();
         read(current);
         notifyChanged();
@@ -404,10 +407,22 @@ final class Prefs {
 
     static int oldVideoDays() { return oldVideoDays; }
 
+    static int oldVideoHours() { return oldVideoHours; }
+
+    static long oldVideoSeconds() { return oldVideoHours > 0 ? oldVideoHours * 3600L : oldVideoDays * 86400L; }
+
     static void setOldVideoDays(int days) {
         oldVideoDays = Math.max(1, days);
+        oldVideoHours = 0;
         SharedPreferences current = preferences;
-        if (current != null) current.edit().putInt(OLD_VIDEO_DAYS, oldVideoDays).apply();
+        if (current != null) current.edit().putInt(OLD_VIDEO_DAYS, oldVideoDays).putInt(OLD_VIDEO_HOURS, 0).apply();
+        notifyChanged();
+    }
+
+    static void setOldVideoHours(int hours) {
+        oldVideoHours = Math.max(1, hours);
+        SharedPreferences current = preferences;
+        if (current != null) current.edit().putInt(OLD_VIDEO_HOURS, oldVideoHours).apply();
         notifyChanged();
     }
 
@@ -422,7 +437,7 @@ final class Prefs {
         for (String key : DEFAULTS.keySet()) editor.remove(key);
         for (String key : TEXT_KEYS) editor.remove(key);
         for (String key : LONG_KEYS) editor.remove(key);
-        editor.remove(OLD_VIDEO_DAYS).remove(FONT_SOURCE).remove(FONT_FILE);
+        editor.remove(OLD_VIDEO_DAYS).remove(OLD_VIDEO_HOURS).remove(FONT_SOURCE).remove(FONT_FILE);
         editor.commit();
         read(current);
         rebuildRules();

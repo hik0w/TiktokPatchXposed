@@ -168,12 +168,9 @@ final class RegionCard {
         List<Entry> entries = new ArrayList<>();
         String own = code(text(user, "getRegion"));
         if (own == null && comment != null) own = code(AuthorRegion.seen(text(user, "getUniqueId")));
-        String videos = own == null && comment != null && Prefs.on(Prefs.COMMENT_REGION)
-                ? code(RegionLookup.found(text(user, "getUniqueId"))) : null;
         String video = code(text(aweme, "getRegion"));
-        if (own == null && videos == null && !source.region.equals(video)) own = source.region;
+        if (own == null && !source.region.equals(video)) own = source.region;
         region(entries, I18n.S.RI_REGION, own, locale);
-        region(entries, I18n.S.RI_THEIR_VIDEOS, videos, locale);
         language(entries, I18n.S.RI_LANGUAGE, text(user, "getLanguage"), Glyph.Kind.GLOBE, locale);
 
         region(entries, I18n.S.RI_VIDEO_REGION, video, locale);

@@ -407,6 +407,7 @@ public final class ModSettingsActivity extends Activity {
     /** Even quicker start, for press feedback. */
     private static final android.view.animation.Interpolator PRESS =
             new android.view.animation.PathInterpolator(0.23f, 1f, 0.32f, 1f);
+    private static final int[] AGE_HOUR_PRESETS = {3, 6, 12};
     private static final int[] AGE_DAYS = {7, 30, 90, 180, 365, 730};
     private static final S[] AGE_NAMES = {S.AGE_WEEK, S.AGE_MONTH, S.AGE_3_MONTHS, S.AGE_6_MONTHS, S.AGE_YEAR, S.AGE_2_YEARS};
 
@@ -497,7 +498,6 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SOCIAL, null, S.COMMENT_PHOTOS, S.COMMENT_PHOTOS_DESC, Prefs.COMMENT_PHOTOS),
             new Setting(Category.SOCIAL, null, S.AUTHOR_REGION, S.AUTHOR_REGION_DESC, Prefs.AUTHOR_REGION),
             new Setting(Category.SOCIAL, null, S.REGION_DETAILS, S.REGION_DETAILS_DESC, Prefs.REGION_DETAILS),
-            new Setting(Category.SOCIAL, null, S.COMMENT_REGION, S.COMMENT_REGION_DESC, Prefs.COMMENT_REGION),
             new Setting(Category.SOCIAL, null, S.COMMENT_HANDLE, S.COMMENT_HANDLE_DESC, Prefs.COMMENT_HANDLE),
             new Setting(Category.SOCIAL, null, S.COMMENT_NO_LIMIT, S.COMMENT_NO_LIMIT_DESC, Prefs.COMMENT_NO_LIMIT),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.NO_WATERMARK, null, Prefs.NO_WATERMARK),
@@ -1287,11 +1287,11 @@ public final class ModSettingsActivity extends Activity {
             View setup = (View) navigation(card, I18n.get(S.FILTER_SETUP), null, view -> push(filterPage(), true)).getParent();
             syncs.add(() -> setup.setVisibility(Prefs.on(Prefs.CUSTOM_FILTER) ? View.VISIBLE : View.GONE));
         } else if (Prefs.OLD_VIDEOS.equals(key)) {
-            TextView value = navigation(card, I18n.get(S.OLD_AGE), ageLabel(Prefs.oldVideoDays()),
+            TextView value = navigation(card, I18n.get(S.OLD_AGE), ageLabel(),
                     view -> push(agePage(), true));
             View row = (View) value.getParent();
             syncs.add(() -> {
-                value.setText(ageLabel(Prefs.oldVideoDays()));
+                value.setText(ageLabel());
                 row.setVisibility(Prefs.on(Prefs.OLD_VIDEOS) ? View.VISIBLE : View.GONE);
             });
         }
@@ -2825,26 +2825,39 @@ public final class ModSettingsActivity extends Activity {
         return page.root;
     }
 
-    /** Preset periods plus a custom number of days. */
+    /** Preset periods plus a custom number of days or hours. */
     private View agePage() {
         Page page = new Page(I18n.get(S.OLD_AGE), false);
         LinearLayout presets = page.card();
-        int current = Prefs.oldVideoDays();
+        int days = Prefs.oldVideoDays();
+        int hours = Prefs.oldVideoHours();
         boolean custom = true;
+        for (int preset : AGE_HOUR_PRESETS) {
+            if (preset == hours) custom = false;
+            choice(presets, String.format(locale, I18n.get(S.AGE_HOURS), preset), preset == hours,
+                    () -> Prefs.setOldVideoHours(preset));
+        }
         for (int index = 0; index < AGE_DAYS.length; index++) {
-            int days = AGE_DAYS[index];
-            if (days == current) custom = false;
-            choice(presets, I18n.get(AGE_NAMES[index]), days == current, () -> Prefs.setOldVideoDays(days));
+            int preset = AGE_DAYS[index];
+            boolean chosen = hours == 0 && preset == days;
+            if (chosen) custom = false;
+            choice(presets, I18n.get(AGE_NAMES[index]), chosen, () -> Prefs.setOldVideoDays(preset));
         }
 
         page.section(I18n.get(S.AGE_CUSTOM));
         LinearLayout card = page.card();
+        ageField(card, S.AGE_DAYS_HINT, custom && hours == 0 ? days : 0, Prefs::setOldVideoDays);
+        ageField(card, S.AGE_HOURS_HINT, custom && hours > 0 ? hours : 0, Prefs::setOldVideoHours);
+        return page.root;
+    }
+
+    private void ageField(LinearLayout card, S hint, int value, java.util.function.IntConsumer save) {
         LinearLayout row = row(card);
         row.setBackground(null);
         EditText field = new EditText(this);
         field.setBackground(null);
         field.setPadding(0, 0, 0, 0);
-        field.setHint(I18n.get(S.AGE_DAYS_HINT));
+        field.setHint(I18n.get(hint));
         field.setHintTextColor(palette.textSecondary);
         field.setTextColor(palette.textPrimary);
         field.setTextSize(17);
@@ -2853,30 +2866,32 @@ public final class ModSettingsActivity extends Activity {
         field.setInputType(InputType.TYPE_CLASS_NUMBER);
         field.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         field.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        if (custom) field.setText(String.valueOf(current));
+        if (value > 0) field.setText(String.valueOf(value));
         row.addView(field, new LinearLayout.LayoutParams(0, -2, 1));
         ImageView check = new ImageView(this);
         check.setImageDrawable(new Glyph(Glyph.Kind.CHECK, palette.accent, dp(22)));
-        check.setVisibility(custom ? View.VISIBLE : View.INVISIBLE);
+        check.setVisibility(value > 0 ? View.VISIBLE : View.INVISIBLE);
         row.addView(check, new LinearLayout.LayoutParams(dp(22), dp(22)));
         row.setOnClickListener(Safe.click("settings", view -> field.requestFocus()));
         field.setOnEditorActionListener((view, action, event) -> {
-            int days;
+            int number;
             try {
-                days = Integer.parseInt(field.getText().toString().trim());
+                number = Integer.parseInt(field.getText().toString().trim());
             } catch (NumberFormatException error) {
-                days = 0;
+                number = 0;
             }
-            if (days > 0) {
-                Prefs.setOldVideoDays(days);
+            if (number > 0) {
+                save.accept(number);
                 pop();
             }
             return true;
         });
-        return page.root;
     }
 
-    private String ageLabel(int days) {
+    private String ageLabel() {
+        int hours = Prefs.oldVideoHours();
+        if (hours > 0) return String.format(locale, I18n.get(S.AGE_HOURS), hours);
+        int days = Prefs.oldVideoDays();
         for (int index = 0; index < AGE_DAYS.length; index++) {
             if (AGE_DAYS[index] == days) return I18n.get(AGE_NAMES[index]);
         }
