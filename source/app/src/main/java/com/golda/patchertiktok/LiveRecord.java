@@ -301,8 +301,9 @@ final class LiveRecord {
         copy.arrow = false;
         rows.add(copy);
         String link = (best != null ? best : choices.get(0)).flv;
+        String[] host = host(activity);
         DownloadSheet.show(activity, I18n.get(I18n.S.LIVE_REC_TITLE), I18n.get(I18n.S.LIVE_REC_PICK), rows, which -> {
-            if (which >= 0 && which < choices.size()) start(activity, choices.get(which));
+            if (which >= 0 && which < choices.size()) start(activity, choices.get(which), host);
             else if (which == choices.size()) copyLink(activity, link);
         }, null);
     }
@@ -313,13 +314,7 @@ final class LiveRecord {
 
     static String roomStream(Activity activity) {
         try {
-            Object fragment = activity;
-            for (int depth = 0; depth < 4; depth++) {
-                Object next = Reflect.call(fragment, "getCurrentFragment");
-                if (next == null || next == fragment) break;
-                fragment = next;
-            }
-            Object room = fragment == activity ? null : room(fragment);
+            Object room = currentRoom(activity);
             if (room == null) return null;
             Object data = Reflect.call(room, "getMultiStreamData");
             if (!(data instanceof String)) {
@@ -330,6 +325,29 @@ final class LiveRecord {
         } catch (Throwable error) {
             RuntimeLog.log("LIVE record: room stream unreadable: " + error);
             return null;
+        }
+    }
+
+    private static Object currentRoom(Activity activity) {
+        Object fragment = activity;
+        for (int depth = 0; depth < 4; depth++) {
+            Object next = Reflect.call(fragment, "getCurrentFragment");
+            if (next == null || next == fragment) break;
+            fragment = next;
+        }
+        return fragment == activity ? null : room(fragment);
+    }
+
+    private static String[] host(Activity activity) {
+        try {
+            Object owner = Reflect.call(currentRoom(activity), "getOwner");
+            Object handle = Reflect.call(owner, "getDisplayId");
+            if (handle == null || String.valueOf(handle).isEmpty()) handle = Reflect.call(owner, "getUniqueId");
+            Object name = Reflect.call(owner, "getNickName");
+            if (name == null) name = Reflect.call(owner, "getNickname");
+            return new String[]{DownloadsPlus.text(handle), DownloadsPlus.text(name)};
+        } catch (Throwable error) {
+            return new String[]{null, null};
         }
     }
 
@@ -354,9 +372,9 @@ final class LiveRecord {
         toast(activity, I18n.get(I18n.S.LIVE_REC_COPIED));
     }
 
-    private static synchronized void start(Activity activity, LiveStreams.Option option) {
+    private static synchronized void start(Activity activity, LiveStreams.Option option, String[] host) {
         if (recorder != null) return;
-        Recorder next = new Recorder(activity, option);
+        Recorder next = new Recorder(activity, option, host);
         recorder = next;
         Thread thread = new Thread(next, "tpx-live-record");
         thread.setDaemon(true);
@@ -411,7 +429,8 @@ final class LiveRecord {
         }
         MAIN.post(Safe.run("LIVE record finished", () -> {
             refresh();
-            toast(app, I18n.get(saved ? I18n.S.LIVE_REC_SAVED : I18n.S.LIVE_REC_FAILED));
+            toast(app, saved ? String.format(Locale.ROOT, I18n.get(I18n.S.LIVE_REC_SAVED), done.path)
+                    : I18n.get(I18n.S.LIVE_REC_FAILED));
         }));
     }
 
@@ -433,17 +452,20 @@ final class LiveRecord {
         final String url;
         final int width;
         final int height;
+        final String[] host;
+        volatile String path = "";
         final long startedAt = SystemClock.elapsedRealtime();
         volatile long stoppedAt;
         private volatile boolean stopping;
         private volatile HttpURLConnection connection;
 
-        Recorder(Activity activity, LiveStreams.Option option) {
+        Recorder(Activity activity, LiveStreams.Option option, String[] host) {
             this.owner = new WeakReference<>(activity);
             this.app = activity.getApplicationContext();
             this.url = option.flv;
             this.width = option.width;
             this.height = option.height;
+            this.host = host;
         }
 
         void stop() {
@@ -461,11 +483,15 @@ final class LiveRecord {
             Uri row = null;
             long total = 0;
             boolean saved = false;
-            String time = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(new Date());
+            long now = System.currentTimeMillis();
+            String time = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(new Date(now));
+            DownloadName.Info info = new DownloadName.Info(host[0], host[1], "LIVE_" + time, now);
             try {
+                MediaDownload.Target target = MediaDownload.target(DownloadFormat.Kind.VIDEO, info, now);
+                path = target.path;
                 connection = open(url);
                 if (stopping) throw new IOException("stopped before start");
-                row = pending(resolver, "TikTok_LIVE_" + time + ".flv", "video/x-flv");
+                row = MediaDownload.pending(resolver, target, name(info, time, now, "flv"), "video/x-flv");
                 if (row == null) throw new IOException("MediaStore insert failed");
                 try (InputStream input = connection.getInputStream(); OutputStream output = resolver.openOutputStream(row, "w")) {
                     if (output == null) throw new IOException("MediaStore stream unavailable");
@@ -490,7 +516,7 @@ final class LiveRecord {
                 if (stoppedAt == 0) stoppedAt = SystemClock.elapsedRealtime();
                 disconnect();
                 if (total < 64 * 1024) throw new IOException("stream ended at once");
-                Uri mp4 = mp4(resolver, row, time);
+                Uri mp4 = mp4(resolver, row, target, name(info, time, now, "mp4"));
                 if (mp4 != null) {
                     try { resolver.delete(row, null, null); } catch (RuntimeException ignored) { }
                     row = mp4;
@@ -510,12 +536,20 @@ final class LiveRecord {
             }
         }
 
-        private Uri mp4(ContentResolver resolver, Uri flv, String time) {
+        private String name(DownloadName.Info info, String time, long now, String extension) {
+            String template = Prefs.text(Prefs.DOWNLOAD_NAME);
+            if (template.trim().isEmpty()) return "TikTok_LIVE_" + time + "." + extension;
+            String quality = width > 0 || height > 0 ? DownloadFormat.resolution(width, height) : "";
+            return DownloadName.file(template, info, DownloadFormat.Kind.VIDEO, quality, 1, 1, time, extension, now,
+                    java.util.TimeZone.getDefault());
+        }
+
+        private Uri mp4(ContentResolver resolver, Uri flv, MediaDownload.Target target, String name) {
             Uri row = null;
             boolean done = false;
             long started = SystemClock.elapsedRealtime();
             try {
-                row = pending(resolver, "TikTok_LIVE_" + time + ".mp4", "video/mp4");
+                row = MediaDownload.pending(resolver, target, name, "video/mp4");
                 if (row == null) return null;
                 try (ParcelFileDescriptor out = resolver.openFileDescriptor(row, "rw")) {
                     if (out == null) return null;
@@ -539,15 +573,6 @@ final class LiveRecord {
             if (open != null) {
                 try { open.disconnect(); } catch (Throwable ignored) { }
             }
-        }
-
-        private static Uri pending(ContentResolver resolver, String name, String mime) {
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/TikTok");
-            values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-            return resolver.insert(MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
         }
 
         private static boolean lowOnSpace() {

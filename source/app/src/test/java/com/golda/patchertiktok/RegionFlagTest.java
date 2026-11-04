@@ -15,4 +15,10 @@ public class RegionFlagTest {
         assertEquals("5 d", RegionFlag.without(shown));
         assertEquals("5 d", RegionFlag.without("5 d"));
     }
+
+    @Test public void findsWhereTheFlagStarts() {
+        assertEquals(4, RegionFlag.at("5 d " + RegionFlag.of("SA")));
+        assertEquals(-1, RegionFlag.at("5 d"));
+        assertEquals(-1, RegionFlag.at(RegionFlag.of("SA")));
+    }
 }

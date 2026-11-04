@@ -14,23 +14,40 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.TimeZone;
 
 /** Background-only streaming into scoped storage; failed attempts remove their pending rows. */
 final class MediaDownload {
+    static final int PLACE_BY_TYPE = 0;
+    static final int PLACE_DOWNLOAD = 1;
+    static final int PLACE_DCIM = 2;
+
+    static final class Target {
+        final Uri collection;
+        final String path;
+
+        Target(Uri collection, String path) {
+            this.collection = collection;
+            this.path = path;
+        }
+    }
+
     private MediaDownload() { }
 
-    static boolean save(Context context, DownloadModels.Item item, String id, String batch, int index) {
+    static boolean save(Context context, DownloadModels.Item item, DownloadName.Info info, String batch, int index,
+            int count, long now) {
         for (String url : item.urls) {
             try {
-                saveUrl(context.getContentResolver(), item.kind, url, id, batch, index);
+                saveUrl(context.getContentResolver(), item, url, info, batch, index, count, now);
                 return true;
             } catch (Exception ignored) { }
         }
         return false;
     }
 
-    private static void saveUrl(ContentResolver resolver, DownloadFormat.Kind kind, String url,
-            String id, String batch, int index) throws IOException {
+    private static void saveUrl(ContentResolver resolver, DownloadModels.Item item, String url,
+            DownloadName.Info info, String batch, int index, int total, long now) throws IOException {
+        DownloadFormat.Kind kind = item.kind;
         HttpURLConnection connection = null;
         Uri row = null;
         boolean published = false;
@@ -51,12 +68,9 @@ final class MediaDownload {
                 input.reset();
                 DownloadFormat.Format format = DownloadFormat.detect(kind, head, count);
                 if (format == null) throw new IOException("Unknown media container");
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.MediaColumns.DISPLAY_NAME, DownloadFormat.fileName(id, batch, index, format.extension));
-                values.put(MediaStore.MediaColumns.MIME_TYPE, format.mime);
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, directory(kind) + "/TikTok");
-                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-                row = resolver.insert(collection(kind), values);
+                String name = DownloadName.file(Prefs.text(Prefs.DOWNLOAD_NAME), info, kind, quality(item), index,
+                        total, batch, format.extension, now, TimeZone.getDefault());
+                row = pending(resolver, target(kind, info, now), name, format.mime);
                 if (row == null) throw new IOException("MediaStore insert failed");
                 try (OutputStream output = resolver.openOutputStream(row, "w")) {
                     if (output == null) throw new IOException("MediaStore stream unavailable");
@@ -118,6 +132,32 @@ final class MediaDownload {
             output.write(buffer, 0, read);
         }
         if (total == 0 || (expected >= 0 && total != expected)) throw new IOException("Incomplete media");
+    }
+
+    private static String quality(DownloadModels.Item item) {
+        if (item.width <= 0 && item.height <= 0 || item.kind == DownloadFormat.Kind.AUDIO) return "";
+        if (item.kind == DownloadFormat.Kind.PHOTO) return item.width > 0 && item.height > 0 ? item.width + "x" + item.height : "";
+        return DownloadFormat.resolution(item.width, item.height);
+    }
+
+    static Target target(DownloadFormat.Kind kind, DownloadName.Info info, long now) {
+        long place = Prefs.number(Prefs.DOWNLOAD_PLACE);
+        String folder = DownloadName.folder(Prefs.text(Prefs.DOWNLOAD_FOLDER), info, now, TimeZone.getDefault());
+        if (place == PLACE_DOWNLOAD) {
+            return new Target(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                    Environment.DIRECTORY_DOWNLOADS + "/" + folder);
+        }
+        String base = place == PLACE_DCIM && kind != DownloadFormat.Kind.AUDIO ? Environment.DIRECTORY_DCIM : directory(kind);
+        return new Target(collection(kind), base + "/" + folder);
+    }
+
+    static Uri pending(ContentResolver resolver, Target target, String name, String mime) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+        values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, target.path);
+        values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+        return resolver.insert(target.collection, values);
     }
 
     static String directory(DownloadFormat.Kind kind) {

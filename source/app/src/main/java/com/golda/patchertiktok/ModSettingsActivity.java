@@ -407,6 +407,7 @@ public final class ModSettingsActivity extends Activity {
     /** Even quicker start, for press feedback. */
     private static final android.view.animation.Interpolator PRESS =
             new android.view.animation.PathInterpolator(0.23f, 1f, 0.32f, 1f);
+    private static final int[] AGE_HOUR_PRESETS = {3, 6, 12};
     private static final int[] AGE_DAYS = {7, 30, 90, 180, 365, 730};
     private static final S[] AGE_NAMES = {S.AGE_WEEK, S.AGE_MONTH, S.AGE_3_MONTHS, S.AGE_6_MONTHS, S.AGE_YEAR, S.AGE_2_YEARS};
 
@@ -495,6 +496,7 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.SOCIAL, null, S.SELF_REPOST, S.SELF_REPOST_DESC, Prefs.SELF_REPOST),
             new Setting(Category.SOCIAL, null, S.COMMENT_PHOTOS, S.COMMENT_PHOTOS_DESC, Prefs.COMMENT_PHOTOS),
             new Setting(Category.SOCIAL, null, S.AUTHOR_REGION, S.AUTHOR_REGION_DESC, Prefs.AUTHOR_REGION),
+            new Setting(Category.SOCIAL, null, S.REGION_DETAILS, S.REGION_DETAILS_DESC, Prefs.REGION_DETAILS),
             new Setting(Category.SOCIAL, null, S.COMMENT_HANDLE, S.COMMENT_HANDLE_DESC, Prefs.COMMENT_HANDLE),
             new Setting(Category.SOCIAL, null, S.COMMENT_NO_LIMIT, S.COMMENT_NO_LIMIT_DESC, Prefs.COMMENT_NO_LIMIT),
             new Setting(Category.SHARING, S.GROUP_MEDIA, S.NO_WATERMARK, null, Prefs.NO_WATERMARK),
@@ -1035,6 +1037,9 @@ public final class ModSettingsActivity extends Activity {
                 value.setText(bitrateLabel());
                 row.setVisibility(Prefs.on(Prefs.HD_UPLOAD) ? View.VISIBLE : View.GONE);
             });
+        } else if (Prefs.QUALITY_PICKER.equals(key)) {
+            TextView value = navigation(card, I18n.get(S.DL_PLACE), placeLabel(), view -> push(savePage(), true));
+            syncs.add(() -> value.setText(placeLabel()));
         } else if (Prefs.EXACT_TIME.equals(key)) {
             View seconds = toggle(card, S.EXACT_TIME_SECONDS, null, Prefs.EXACT_TIME_SECONDS);
             subOption(seconds);
@@ -1066,11 +1071,11 @@ public final class ModSettingsActivity extends Activity {
             View setup = (View) navigation(card, I18n.get(S.FILTER_SETUP), null, view -> push(filterPage(), true)).getParent();
             syncs.add(() -> setup.setVisibility(Prefs.on(Prefs.CUSTOM_FILTER) ? View.VISIBLE : View.GONE));
         } else if (Prefs.OLD_VIDEOS.equals(key)) {
-            TextView value = navigation(card, I18n.get(S.OLD_AGE), ageLabel(Prefs.oldVideoDays()),
+            TextView value = navigation(card, I18n.get(S.OLD_AGE), ageLabel(),
                     view -> push(agePage(), true));
             View row = (View) value.getParent();
             syncs.add(() -> {
-                value.setText(ageLabel(Prefs.oldVideoDays()));
+                value.setText(ageLabel());
                 row.setVisibility(Prefs.on(Prefs.OLD_VIDEOS) ? View.VISIBLE : View.GONE);
             });
         }
@@ -1570,26 +1575,6 @@ public final class ModSettingsActivity extends Activity {
             closeSheet();
             copySettings();
         }));
-        return content;
-    }
-
-    private View resetSheet() {
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout info = row(content);
-        info.setClickable(false);
-        info.setBackground(null);
-        texts(info, I18n.get(S.RESET_CONFIRM), I18n.get(S.RESET_CONFIRM_TEXT));
-        LinearLayout reset = row(content);
-        ((TextView) texts(reset, I18n.get(S.RESET_ALL), null).getChildAt(0)).setTextColor(0xFFFE2C55);
-        reset.setOnClickListener(view -> {
-            closeSheet();
-            Prefs.reset();
-            android.widget.Toast.makeText(this, I18n.get(S.RESET_DONE), android.widget.Toast.LENGTH_SHORT).show();
-        });
-        LinearLayout cancel = row(content);
-        texts(cancel, getString(android.R.string.cancel), null);
-        cancel.setOnClickListener(view -> closeSheet());
         return content;
     }
 
@@ -2277,6 +2262,58 @@ public final class ModSettingsActivity extends Activity {
         return null;
     }
 
+    private static final S[] PLACE_NAMES = {S.DL_PLACE_BY_TYPE, S.DL_PLACE_DOWNLOAD, S.DL_PLACE_DCIM};
+
+    private String placeLabel() {
+        long place = Prefs.number(Prefs.DOWNLOAD_PLACE);
+        String base = place == MediaDownload.PLACE_DOWNLOAD ? android.os.Environment.DIRECTORY_DOWNLOADS
+                : place == MediaDownload.PLACE_DCIM ? android.os.Environment.DIRECTORY_DCIM
+                : android.os.Environment.DIRECTORY_MOVIES;
+        String folder = Prefs.text(Prefs.DOWNLOAD_FOLDER).trim();
+        return base + "/" + (folder.isEmpty() ? DownloadName.DEFAULT_FOLDER : folder);
+    }
+
+    private View savePage() {
+        Page page = new Page(I18n.get(S.DL_PLACE), true);
+        TextView example = new TextView(this);
+        Runnable preview = Safe.run("settings", () -> {
+            long now = System.currentTimeMillis();
+            DownloadName.Info sample = new DownloadName.Info("tiktok", "TikTok", "7412345678901234567", now);
+            String name = DownloadName.file(Prefs.text(Prefs.DOWNLOAD_NAME), sample, DownloadFormat.Kind.VIDEO, "1080p",
+                    1, 1, now + "_1a2b3c4d", "mp4", now, java.util.TimeZone.getDefault());
+            String path = MediaDownload.target(DownloadFormat.Kind.VIDEO, sample, now).path;
+            example.setText(String.format(locale, I18n.get(S.DL_EXAMPLE), path + "/" + name));
+        });
+        page.section(I18n.get(S.DL_PLACE_WHERE));
+        List<Integer> places = java.util.Arrays.asList(MediaDownload.PLACE_BY_TYPE, MediaDownload.PLACE_DOWNLOAD,
+                MediaDownload.PLACE_DCIM);
+        page.card().addView(choiceSheet(Prefs.DOWNLOAD_PLACE, places, place -> I18n.get(PLACE_NAMES[place]),
+                S.DL_PLACE_FOOTER, preview));
+        page.section(I18n.get(S.DL_FOLDER));
+        EditText folder = textField(page.card(), Prefs.DOWNLOAD_FOLDER, DownloadName.DEFAULT_FOLDER);
+        page.footer(I18n.get(S.DL_FOLDER_FOOTER));
+        page.section(I18n.get(S.DL_NAME));
+        EditText name = textField(page.card(), Prefs.DOWNLOAD_NAME, "TikTok_{id}_…");
+        page.footer(I18n.get(S.DL_NAME_FOOTER));
+        example.setTextColor(palette.textSecondary);
+        example.setTextSize(13);
+        example.setTypeface(Fonts.regular(this));
+        example.setTextIsSelectable(true);
+        example.setPadding(dp(24), dp(14), dp(24), 0);
+        page.content.addView(example);
+        for (EditText field : new EditText[]{folder, name}) {
+            field.setSingleLine(true);
+            field.setMinLines(1);
+            field.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+                @Override public void afterTextChanged(Editable s) { preview.run(); }
+            });
+        }
+        preview.run();
+        return page.root;
+    }
+
     private View excludePage() {
         Page page = new Page(I18n.get(S.TRANSLATE_EXCLUDE), true);
         textField(page.card(), Prefs.TRANSLATE_EXCLUDE, I18n.get(S.TRANSLATE_EXCLUDE_HINT));
@@ -2316,7 +2353,7 @@ public final class ModSettingsActivity extends Activity {
         return page.root;
     }
 
-    private void textField(LinearLayout card, String key, String hint) {
+    private EditText textField(LinearLayout card, String key, String hint) {
         EditText field = new EditText(this);
         field.setBackground(null);
         field.setText(Prefs.text(key));
@@ -2336,6 +2373,7 @@ public final class ModSettingsActivity extends Activity {
             @Override public void afterTextChanged(Editable s) { Prefs.setText(key, s.toString()); }
         });
         card.addView(field, new LinearLayout.LayoutParams(-1, -2));
+        return field;
     }
 
     private void numberRow(LinearLayout card, String title, String key) {
@@ -2407,6 +2445,17 @@ public final class ModSettingsActivity extends Activity {
      * A group of rows: one quiet card with hairlines between its rows, so a switch always sits
      * inside a shape rather than floating on the page.
      */
+    private void section(LinearLayout parent, String title) {
+        TextView header = new TextView(this);
+        header.setText(title);
+        header.setTextColor(palette.textTertiary);
+        header.setTextSize(12.5f);
+        header.setTypeface(Fonts.regular(this));
+        header.setPadding(dp(34), dp(24), dp(34), dp(8));
+        if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
+        parent.addView(header);
+    }
+
     private LinearLayout card(LinearLayout parent) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
@@ -2560,26 +2609,39 @@ public final class ModSettingsActivity extends Activity {
         return page.root;
     }
 
-    /** Preset periods plus a custom number of days. */
+    /** Preset periods plus a custom number of days or hours. */
     private View agePage() {
         Page page = new Page(I18n.get(S.OLD_AGE), false);
         LinearLayout presets = page.card();
-        int current = Prefs.oldVideoDays();
+        int days = Prefs.oldVideoDays();
+        int hours = Prefs.oldVideoHours();
         boolean custom = true;
+        for (int preset : AGE_HOUR_PRESETS) {
+            if (preset == hours) custom = false;
+            choice(presets, String.format(locale, I18n.get(S.AGE_HOURS), preset), preset == hours,
+                    () -> Prefs.setOldVideoHours(preset));
+        }
         for (int index = 0; index < AGE_DAYS.length; index++) {
-            int days = AGE_DAYS[index];
-            if (days == current) custom = false;
-            choice(presets, I18n.get(AGE_NAMES[index]), days == current, () -> Prefs.setOldVideoDays(days));
+            int preset = AGE_DAYS[index];
+            boolean chosen = hours == 0 && preset == days;
+            if (chosen) custom = false;
+            choice(presets, I18n.get(AGE_NAMES[index]), chosen, () -> Prefs.setOldVideoDays(preset));
         }
 
         page.section(I18n.get(S.AGE_CUSTOM));
         LinearLayout card = page.card();
+        ageField(card, S.AGE_DAYS_HINT, custom && hours == 0 ? days : 0, Prefs::setOldVideoDays);
+        ageField(card, S.AGE_HOURS_HINT, custom && hours > 0 ? hours : 0, Prefs::setOldVideoHours);
+        return page.root;
+    }
+
+    private void ageField(LinearLayout card, S hint, int value, java.util.function.IntConsumer save) {
         LinearLayout row = row(card);
         row.setBackground(null);
         EditText field = new EditText(this);
         field.setBackground(null);
         field.setPadding(0, 0, 0, 0);
-        field.setHint(I18n.get(S.AGE_DAYS_HINT));
+        field.setHint(I18n.get(hint));
         field.setHintTextColor(palette.textSecondary);
         field.setTextColor(palette.textPrimary);
         field.setTextSize(17);
@@ -2588,30 +2650,32 @@ public final class ModSettingsActivity extends Activity {
         field.setInputType(InputType.TYPE_CLASS_NUMBER);
         field.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         field.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        if (custom) field.setText(String.valueOf(current));
+        if (value > 0) field.setText(String.valueOf(value));
         row.addView(field, new LinearLayout.LayoutParams(0, -2, 1));
         ImageView check = new ImageView(this);
         check.setImageDrawable(new Glyph(Glyph.Kind.CHECK, palette.accent, dp(22)));
-        check.setVisibility(custom ? View.VISIBLE : View.INVISIBLE);
+        check.setVisibility(value > 0 ? View.VISIBLE : View.INVISIBLE);
         row.addView(check, new LinearLayout.LayoutParams(dp(22), dp(22)));
         row.setOnClickListener(Safe.click("settings", view -> field.requestFocus()));
         field.setOnEditorActionListener((view, action, event) -> {
-            int days;
+            int number;
             try {
-                days = Integer.parseInt(field.getText().toString().trim());
+                number = Integer.parseInt(field.getText().toString().trim());
             } catch (NumberFormatException error) {
-                days = 0;
+                number = 0;
             }
-            if (days > 0) {
-                Prefs.setOldVideoDays(days);
+            if (number > 0) {
+                save.accept(number);
                 pop();
             }
             return true;
         });
-        return page.root;
     }
 
-    private String ageLabel(int days) {
+    private String ageLabel() {
+        int hours = Prefs.oldVideoHours();
+        if (hours > 0) return String.format(locale, I18n.get(S.AGE_HOURS), hours);
+        int days = Prefs.oldVideoDays();
         for (int index = 0; index < AGE_DAYS.length; index++) {
             if (AGE_DAYS[index] == days) return I18n.get(AGE_NAMES[index]);
         }
@@ -3002,14 +3066,7 @@ public final class ModSettingsActivity extends Activity {
         }
 
         void section(String title) {
-            TextView header = new TextView(ModSettingsActivity.this);
-            header.setText(title);
-            header.setTextColor(palette.textTertiary);
-            header.setTextSize(12.5f);
-            header.setTypeface(Fonts.regular(ModSettingsActivity.this));
-            header.setPadding(dp(34), dp(24), dp(34), dp(8));
-            if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
-            content.addView(header);
+            ModSettingsActivity.this.section(content, title);
         }
 
         LinearLayout card() { return ModSettingsActivity.this.card(content); }
