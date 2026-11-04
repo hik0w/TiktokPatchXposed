@@ -73,17 +73,21 @@ final class CommentAuthor {
             // No row.
         }
         if (!(row instanceof ViewGroup)) return;
-        Object user = Reflect.call(comment(cell), "getUser");
+        Object comment = comment(cell);
+        Object user = Reflect.call(comment, "getUser");
         Object nickname = Reflect.call(user, "getNickname");
         if (!(nickname instanceof String) || ((String) nickname).isEmpty()) return;
-        String flag = Prefs.on(Prefs.AUTHOR_REGION) ? RegionFlag.of(region(user)) : null;
+        String code = Prefs.on(Prefs.AUTHOR_REGION) ? region(user) : null;
+        String flag = RegionFlag.of(code);
         Object handle = Prefs.on(Prefs.COMMENT_HANDLE) ? Reflect.call(user, "getUniqueId") : null;
         String at = handle instanceof String && !((String) handle).isEmpty() && !handle.equals(nickname) ? "@" + handle : null;
         ViewGroup view = (ViewGroup) row;
         // TikTok can style the name a moment after the bind; mark it then.
         view.post(Safe.run("comment author", () -> {
             TextView name = nameLabel(view, (String) nickname);
-            if (name != null) mark(name, at, flag);
+            if (name == null) return;
+            if (flag != null) RegionCard.attach(name, code, user, null, comment);
+            mark(name, at, flag);
         }));
     }
 
