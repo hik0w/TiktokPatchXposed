@@ -7,7 +7,7 @@ turns on features TikTok rolls out only to some people, and adds many small thin
 everywhere, your own color, font and AMOLED theme, hiding parts of the screen, country flags,
 invisible mode and auto streaks. All settings live right inside TikTok.
 
-Current version: **4.4.4**. Tested on **TikTok 47.5.3**, **47.4.3** and **47.1.4** (Google Play and universal APK),
+Current version: **4.4.3**. Tested on **TikTok 47.4.3** and **47.1.4** (Google Play and universal APK),
 **Android 16**. Most features find what they need in TikTok by themselves, so
 they survive TikTok updates.
 
@@ -52,7 +52,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **Hide paid content and products**, **hide AI videos**.
 - **Only fresh videos**: hides recommendations older than the chosen period.
 - **Hide videos I've seen**: the module remembers what you watched and leaves it out when TikTok sends it again.
-- **Own filter**: by words, hashtags, authors, countries, minimum likes and views.
+- **Own filter**: by words, hashtags, authors, minimum likes and views.
 
 ### Playback
 - **Auto-scroll everywhere**: in search, following and chats; profiles and liked videos have their own switch in the
@@ -64,8 +64,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **3× speed** in TikTok's own speed menu.
 - **Screen refresh rate**: hold 60, 90 or 120 Hz; TikTok no longer lowers it to the video's frame rate.
 - **Own speeds** and **remember speed**.
-- **Resume where you left off**, **keep "Clear display"**.
-- **Seek on every video**: on short ones the bar stays hidden, drag along the bottom edge of the video.
+- **Resume where you left off**, **keep "Clear display"**.- **Seek on every video**: on short ones the bar stays hidden, drag along the bottom edge of the video.
 - 🧪 **Sound in muted videos**: brings back sound TikTok turned off over copyright, if the video still has it.
 - **Quality for Wi-Fi and mobile data separately** (best, saver or TikTok's choice), 🧪 **H.264 video**,
   **no HDR**, 🧪 **photos in the best quality** (up to 8 MP).
@@ -85,7 +84,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **TikTok's translate buttons**: an icon on every foreign comment and "Translate all" in the
   comments header, even if TikTok never showed them to you.
 - **Auto-translate comments**: turns TikTok's translation on for all comments right away.
-- **Copy text only**, **author's country** (a flag next to the video date, in profiles and in comments), **@username of commenters**.
+- **Copy text only**, **author's country** (a flag next to the video date, in profiles and in comments), **flag details** (tap the flag for the account and video region, languages and tagged place), **@username of commenters**.
 - **Comment reposts**; 🧪 **repost your own videos**.
 - 🧪 **Up to 9 photos in a comment**.
 
@@ -99,7 +98,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **Clean links** (no tracking), **links in your browser**, **screenshots everywhere**.
 
 ### Privacy
-- 🧪 **Invisible mode**: not showing up in story and highlight views (a separate 🧪 switch), profile and video views. On your phone the story still counts as watched.
+- 🧪 **Invisible mode**: not showing up in story and highlight views (separate switches), profile and video views.
 - **In chats:** hide "typing…", 🧪 "online" and 🧪 "Read" (with "Mark as read" in a message's menu
   and "Read" when you reply).
 - 🧪 **Block location**, 🧪 **hide VPN**, 🧪 **random device ID**, 🧪 **hide root**,
@@ -123,6 +122,14 @@ The module doesn't change the account's region or your IP address, so the result
 ### Experiments
 - **Hidden TikTok features**: hold-to-speed-up, audio and photo comments, comments to favorites and more.
 - 🧪 **No forced login**, 🧪 **no hashtag limit**, 🧪 **camera extras** (teleprompter, green screen).
+
+### Account
+Its own section in the settings; each tool runs only when you start it:
+- 🧪 **Who unfollowed me**: compares your followers with the previous check and lists who left, who is new and who
+  doesn't follow you back. The lists stay on your phone.
+- 🧪 **Suspicious followers**: accounts with no videos, no followers, the default photo or name, or following thousands;
+  untick anyone you know and remove the rest.
+- 🧪 **Remove all reposts, likes or favorites**: counts first and asks, then removes them one at a time at a human pace.
 
 ### Settings screen
 Search across settings, how many features are on in each section, "Feature status" (what was found in your

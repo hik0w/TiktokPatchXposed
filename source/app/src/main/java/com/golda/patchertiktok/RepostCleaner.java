@@ -152,13 +152,13 @@ final class RepostCleaner {
     }
 
     /** TikTok's answers carry status_code; 0 or nothing to read means it was done. */
-    private static void check(Object answer) throws IOException {
+    static void check(Object answer) throws IOException {
         Object code = Reflect.get(answer, "status_code");
         if (code instanceof Number && ((Number) code).intValue() != 0) throw new IOException("status " + code);
     }
 
     /** Subscribes to a stream or a single and waits for its first value. */
-    private static Object await(Object source) throws Exception {
+    static Object await(Object source) throws Exception {
         if (source == null) throw new IOException("no answer");
         Method subscribe = subscribe(source.getClass());
         Class<?> listener = subscribe.getParameterTypes()[0];
