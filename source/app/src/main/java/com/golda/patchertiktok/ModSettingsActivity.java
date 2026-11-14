@@ -537,26 +537,58 @@ public final class ModSettingsActivity extends Activity {
             new Setting(Category.LAB, null, S.CAMERA_EXTRAS, S.CAMERA_EXTRAS_DESC, Prefs.CAMERA_EXTRAS),
     };
 
+    /**
+     * The short list on the main page: the features people come to choose. The basics (ads, LIVE,
+     * watermark) are on from the start, so they stay in "All". A {@link Category} is a row that
+     * opens its whole group.
+     */
+    private static final Object[] MAIN = {Prefs.AUTO_SCROLL, Prefs.QUALITY_PICKER, Prefs.STORY_DOWNLOAD, Category.GHOST,
+            Prefs.EXACT_TIME, Prefs.AUTHOR_REGION, Prefs.MESSAGE_TIME, Category.STREAKS, Prefs.AMOLED};
+
     private View mainPage() {
         Page page = new Page(I18n.get(S.APP_NAME), true);
         // One quiet line instead of a status card, a big counter and tiles: the sections come first.
         TextView statusDetail = statusLine(page.content);
 
-        EditText search = searchBox(page.content);
+        LinearLayout main = new LinearLayout(this);
+        main.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout all = new LinearLayout(this);
+        all.setOrientation(LinearLayout.VERTICAL);
+        View modes = segmented(new String[]{I18n.get(S.TAB_MAIN), I18n.get(S.MODE_ALL)},
+                () -> Prefs.on(Prefs.SETTINGS_SIMPLE) ? 0 : 1, chosen -> {
+                    hideKeyboard(page.content);
+                    Prefs.set(Prefs.SETTINGS_SIMPLE, chosen == 0);
+                    View shown = chosen == 0 ? main : all;
+                    (chosen == 0 ? all : main).setVisibility(View.GONE);
+                    shown.setVisibility(View.VISIBLE);
+                    if (motion()) {
+                        shown.setAlpha(0f);
+                        shown.setTranslationY(dp(8));
+                        shown.animate().alpha(1f).translationY(0).setDuration(200).setInterpolator(EASE).start();
+                    }
+                });
+        LinearLayout.LayoutParams modeParams = new LinearLayout.LayoutParams(-1, -2);
+        modeParams.setMargins(dp(16), dp(2), dp(16), dp(14));
+        page.content.addView(modes, modeParams);
+        page.content.addView(main, new LinearLayout.LayoutParams(-1, -2));
+        page.content.addView(all, new LinearLayout.LayoutParams(-1, -2));
+        (Prefs.on(Prefs.SETTINGS_SIMPLE) ? all : main).setVisibility(View.GONE);
+        List<Runnable> counters = new ArrayList<>();
+        mainList(main, counters);
+
+        EditText search = searchBox(all);
         LinearLayout groups = new LinearLayout(this);
         groups.setOrientation(LinearLayout.VERTICAL);
-        page.content.addView(groups, new LinearLayout.LayoutParams(-1, -2));
+        all.addView(groups, new LinearLayout.LayoutParams(-1, -2));
         LinearLayout results = new LinearLayout(this);
         results.setOrientation(LinearLayout.VERTICAL);
         results.setVisibility(View.GONE);
-        page.content.addView(results, new LinearLayout.LayoutParams(-1, -2));
+        all.addView(results, new LinearLayout.LayoutParams(-1, -2));
 
-        LinearLayout.LayoutParams gap = new LinearLayout.LayoutParams(-1, dp(12));
         LinearLayout list = card(groups);
-        List<Runnable> counters = new ArrayList<>();
         for (Category category : Category.values()) counters.add(categoryRow(list, category));
-        groups.addView(new View(this), gap);
-        LinearLayout about = card(groups);
+        page.content.addView(new View(this), new LinearLayout.LayoutParams(-1, dp(12)));
+        LinearLayout about = card(page.content);
         LinearLayout more = row(about);
         texts(more, I18n.get(S.MORE), String.format(locale, I18n.get(S.MORE_DESC), BuildConfig.VERSION_NAME));
         ImageView moreChevron = new ImageView(this);
@@ -589,6 +621,72 @@ public final class ModSettingsActivity extends Activity {
             for (Runnable refresh : counters) refresh.run();
         });
         return page.root;
+    }
+
+    /** The "Main" list: its switches and groups, then the region and the color. */
+    private void mainList(LinearLayout parent, List<Runnable> syncs) {
+        LinearLayout card = card(parent);
+        for (Object entry : MAIN) {
+            if (entry instanceof Category) {
+                Category category = (Category) entry;
+                boolean ghost = category == Category.GHOST;
+                TextView count = navigation(card, I18n.get(ghost ? S.SECTION_GHOST : category.title), null,
+                        view -> push(categoryPage(category), true));
+                syncs.add(() -> {
+                    // Invisible mode counts only its own switches, not the whole privacy page.
+                    int total = 0;
+                    int enabled = 0;
+                    for (Setting setting : SETTINGS) {
+                        if (ghost ? setting.group != S.GROUP_INVISIBLE : setting.category != category) continue;
+                        total++;
+                        if (Prefs.on(setting.key)) enabled++;
+                    }
+                    count.setText(total == 1 ? (enabled == 1 ? "" : I18n.get(S.OFF))
+                            : String.format(locale, I18n.get(S.ENABLED_COUNT), enabled, total));
+                });
+                continue;
+            }
+            String key = (String) entry;
+            Setting setting = null;
+            for (Setting candidate : SETTINGS) if (candidate.key.equals(key)) setting = candidate;
+            if (setting == null) continue;
+            View row = toggle(card, setting.title, setting.description, key);
+            // The same switch can change on its group's page; keep this one in step.
+            syncs.add(() -> {
+                for (int index = 0; index < ((LinearLayout) row).getChildCount(); index++) {
+                    View child = ((LinearLayout) row).getChildAt(index);
+                    if (child instanceof Toggle && ((Toggle) child).checked() != Prefs.on(key)) {
+                        ((Toggle) child).setChecked(Prefs.on(key), false);
+                    }
+                }
+            });
+        }
+
+        header(parent, I18n.get(S.PICKS));
+        LinearLayout picks = card(parent);
+        TextView region = navigation(picks, I18n.get(S.REGION), null, view -> push(categoryPage(Category.REGION), true));
+        TextView accent = navigation(picks, I18n.get(S.ACCENT_SHORT), null, view -> push(colorPage(), true));
+        syncs.add(() -> {
+            String code = Prefs.region();
+            String flag = RegionFlag.of(code);
+            boolean set = Regions.find(code) != null;
+            region.setText(set ? code.toUpperCase(Locale.ROOT) : I18n.get(S.OFF));
+            region.setCompoundDrawablePadding(dp(6));
+            region.setCompoundDrawablesRelative(set && flag != null ? new FlagDot(flag, dp(16)) : null, null, null, null);
+            boolean own = Prefs.on(Prefs.ACCENT);
+            int rgb = (int) Prefs.number(Prefs.ACCENT_COLOR) & 0xFFFFFF;
+            accent.setText(own ? String.format(Locale.ROOT, "#%06X", rgb) : I18n.get(S.OFF));
+            GradientDrawable dot = null;
+            if (own) {
+                dot = new GradientDrawable();
+                dot.setShape(GradientDrawable.OVAL);
+                dot.setColor(0xFF000000 | rgb);
+                dot.setBounds(0, 0, dp(14), dp(14));
+            }
+            accent.setCompoundDrawablePadding(dp(6));
+            accent.setCompoundDrawablesRelative(dot, null, null, null);
+        });
+        for (Runnable sync : syncs) sync.run();
     }
 
     /** Version, backup and the source code: things looked for once in a while, one row on the main page. */
@@ -2387,6 +2485,18 @@ public final class ModSettingsActivity extends Activity {
      * A group of rows: one quiet card with hairlines between its rows, so a switch always sits
      * inside a shape rather than floating on the page.
      */
+    /** A quiet heading over the next card. */
+    private void header(LinearLayout parent, String title) {
+        TextView header = new TextView(this);
+        header.setText(title);
+        header.setTextColor(palette.textTertiary);
+        header.setTextSize(12.5f);
+        header.setTypeface(Fonts.regular(this));
+        header.setPadding(dp(34), dp(24), dp(34), dp(8));
+        if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
+        parent.addView(header);
+    }
+
     private LinearLayout card(LinearLayout parent) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
@@ -2981,16 +3091,7 @@ public final class ModSettingsActivity extends Activity {
             });
         }
 
-        void section(String title) {
-            TextView header = new TextView(ModSettingsActivity.this);
-            header.setText(title);
-            header.setTextColor(palette.textTertiary);
-            header.setTextSize(12.5f);
-            header.setTypeface(Fonts.regular(ModSettingsActivity.this));
-            header.setPadding(dp(34), dp(24), dp(34), dp(8));
-            if (Build.VERSION.SDK_INT >= 28) header.setAccessibilityHeading(true);
-            content.addView(header);
-        }
+        void section(String title) { header(content, title); }
 
         LinearLayout card() { return ModSettingsActivity.this.card(content); }
 

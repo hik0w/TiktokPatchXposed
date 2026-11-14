@@ -95,6 +95,8 @@ final class Prefs {
     static final String COMMENT_NO_LIMIT = "comment_no_limit";
     static final String CLASSIC_EMOJI = "classic_emoji";
     static final String OFFLINE_MORE = "offline_more";
+    /** The settings screen opens on its short list of main features. */
+    static final String SETTINGS_SIMPLE = "settings_simple";
     static final String ACCENT = "accent_enabled";
     static final String ACCENT_COLOR = "accent_color";
     static final long DEFAULT_ACCENT = 0x8B5CF6;
@@ -229,6 +231,7 @@ final class Prefs {
         DEFAULTS.put(COMMENT_NO_LIMIT, false);
         DEFAULTS.put(CLASSIC_EMOJI, false);
         DEFAULTS.put(OFFLINE_MORE, false);
+        DEFAULTS.put(SETTINGS_SIMPLE, true);
         DEFAULTS.put(ACCENT, false);
         DEFAULTS.put(BURN_IN, false);
         DEFAULTS.put(AUTHOR_REGION, false);
