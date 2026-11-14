@@ -9,6 +9,8 @@ import java.util.List;
 /** Removes ads, LIVE, "people you may know", paid/shop and AI videos, and the user's own filter matches from video lists. */
 final class FeedFilter {
     private static final String SNAPSHOT = "com.golda.patchertiktok.cleanFeed";
+    private static final String RECOMMENDED = "com.golda.patchertiktok.recommendedFeed";
+    private static final String FEED_SOURCE = "com.ss.android.ugc.aweme.feed.FeedApiService";
     /** awemeType of the card TikTok makes itself, and cardInsertInfo.cardType of the server one. */
     private static final int FRIEND_CARD_TYPE = 4004;
     private static final int FRIEND_CARD_SERVER_TYPE = 49;
@@ -35,6 +37,7 @@ final class FeedFilter {
     static void install(ClassLoader loader) {
         Class<?> feed = Hooks.findClass("com.ss.android.ugc.aweme.feed.model.FeedItemList", loader);
         if (feed != null) hookFeedItemList(feed);
+        hookFeedSource(loader);
         for (String[] getter : LIST_GETTERS) {
             Class<?> type = Hooks.findClass(getter[0], loader);
             if (type == null) continue;
@@ -52,7 +55,7 @@ final class FeedFilter {
         Hooks.hookAll(feed, "setItems", new Hooks.Hook() {
             @Override protected void before(Hooks.Call param) {
                 if (param.args.length == 0 || !(param.args[0] instanceof List<?>)) return;
-                List<?> filtered = filter((List<?>) param.args[0], true, true);
+                List<?> filtered = filter((List<?>) param.args[0], recommended(param.thisObject), true);
                 param.args[0] = filtered;
                 remember(param.thisObject, filtered);
             }
@@ -63,7 +66,7 @@ final class FeedFilter {
                 List<?> items = (List<?>) param.getResult();
                 Object cached = Hooks.getExtra(param.thisObject, SNAPSHOT);
                 if (cached instanceof Snapshot && ((Snapshot) cached).matches(items)) return;
-                List<?> filtered = filter(items, true);
+                List<?> filtered = filter(items, recommended(param.thisObject));
                 if (filtered != items) {
                     try {
                         Hooks.setField(param.thisObject, "items", filtered);
@@ -121,6 +124,33 @@ final class FeedFilter {
         }
     }
 
+    /** Profiles, likes and other lists share FeedItemList; only For You pages come through the feed service. */
+    private static void hookFeedSource(ClassLoader loader) {
+        Class<?> service = Hooks.findClass(FEED_SOURCE, loader);
+        if (service == null || Hooks.hookAll(service, "fetchFeedList", new Hooks.Hook() {
+            @Override protected void after(Hooks.Call param) {
+                Object list = param.getResult();
+                if (list == null) return;
+                Hooks.setExtra(list, RECOMMENDED, Boolean.TRUE);
+                Object items = Reflect.get(list, "items");
+                if (!(items instanceof List<?>)) return;
+                List<?> filtered = filter((List<?>) items, true, true);
+                if (filtered != items) {
+                    try {
+                        Hooks.setField(list, "items", filtered);
+                    } catch (Throwable ignored) { }
+                }
+                remember(list, filtered);
+            }
+        }) == 0) {
+            RuntimeLog.log("feed filter: For You source not found, age and own filters apply nowhere");
+        }
+    }
+
+    private static boolean recommended(Object list) {
+        return Hooks.getExtra(list, RECOMMENDED) != null;
+    }
+
     private static void remember(Object owner, List<?> items) {
         Hooks.setExtra(owner, SNAPSHOT, new Snapshot(items));
     }
@@ -157,7 +187,7 @@ final class FeedFilter {
         FilterRules rules = recommended && Prefs.on(Prefs.CUSTOM_FILTER) ? Prefs.rules() : FilterRules.NONE;
         // Publication time is in seconds.
         long cutoff = recommended && Prefs.on(Prefs.OLD_VIDEOS)
-                ? System.currentTimeMillis() / 1000 - Prefs.oldVideoDays() * 86400L : 0;
+                ? System.currentTimeMillis() / 1000 - Prefs.oldVideoSeconds() : 0;
         boolean seen = recommended && incoming && Prefs.on(Prefs.HIDE_SEEN);
         if (!ads && !live && !suggested && !promo && !ai && rules.isEmpty() && cutoff == 0 && !seen) return items;
         ArrayList<Object> filtered = null;

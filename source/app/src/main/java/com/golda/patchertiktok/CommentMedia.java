@@ -238,7 +238,12 @@ final class CommentMedia {
         row.addView(title, new LinearLayout.LayoutParams(0, -2, 1f));
         row.setOnClickListener(Safe.click("comment media", view -> {
             Object id = Reflect.call(comment, "getCid");
-            DownloadsPlus.save(dialog.getContext(), "comment_" + id, media);
+            Object user = Reflect.call(comment, "getUser");
+            Object created = Reflect.call(comment, "getCreateTime");
+            DownloadName.Info info = new DownloadName.Info(DownloadsPlus.text(Reflect.call(user, "getUniqueId")),
+                    DownloadsPlus.text(Reflect.call(user, "getNickname")), "comment_" + id,
+                    DownloadsPlus.millis(created));
+            DownloadsPlus.save(dialog.getContext(), info, media);
             try {
                 dialog.dismiss();
             } catch (RuntimeException ignored) {

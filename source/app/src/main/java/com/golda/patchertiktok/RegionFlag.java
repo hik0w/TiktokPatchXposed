@@ -20,6 +20,11 @@ final class RegionFlag {
         return new String(Character.toChars(0x1F1E6 + a - 'A')) + new String(Character.toChars(0x1F1E6 + b - 'A'));
     }
 
+    static int at(String text) {
+        java.util.regex.Matcher matcher = APPENDED.matcher(text);
+        return matcher.find() ? matcher.start() + 1 : -1;
+    }
+
     /** The text without a flag appended earlier, so a reused label never collects two. */
     static String without(String text) {
         return APPENDED.matcher(text).replaceFirst("");

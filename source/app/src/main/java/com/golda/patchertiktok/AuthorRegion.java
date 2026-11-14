@@ -205,7 +205,10 @@ final class AuthorRegion {
         if (owner == null) return;
         AccountDate.show(name, user);
         String flag = Prefs.on(Prefs.AUTHOR_REGION) ? RegionFlag.of(region) : null;
-        if (flag != null) pin(name, flag, owner);
+        if (flag != null) {
+            RegionCard.attach(name, region, user, null, null);
+            pin(name, flag, owner);
+        }
     }
 
     private static String userRegion(Object user) {
@@ -240,23 +243,26 @@ final class AuthorRegion {
         } catch (Throwable error) {
             return;
         }
-        String flag = RegionFlag.of(region(aweme));
+        String code = region(aweme);
+        String flag = RegionFlag.of(code);
         // Only the feed's own pages: comments use the same date label id.
         if (flag == null || !(feed instanceof View)) return;
+        Object author = Reflect.call(aweme, "getAuthor");
         TextView label = visibleLabel((View) feed);
         if (label != null) {
+            RegionCard.attach(label, code, author, aweme, null);
             pin(label, flag, null);
             return;
         }
         if (!laidOut) return;
         // Some TikTok versions and videos show no date line (#21): the author's name takes the flag.
-        Object author = Reflect.call(aweme, "getAuthor");
         for (String getter : new String[]{"getNickname", "getUniqueId"}) {
             Object value = Reflect.call(author, getter);
             String name = value instanceof String ? ((String) value).trim() : "";
             if (name.isEmpty()) continue;
             TextView shown = visibleName((View) feed, name);
             if (shown == null) continue;
+            RegionCard.attach(shown, code, author, aweme, null);
             pin(shown, flag, name);
             return;
         }

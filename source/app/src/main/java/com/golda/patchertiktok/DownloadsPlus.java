@@ -168,20 +168,19 @@ public final class DownloadsPlus {
         Method action = call.method instanceof Method ? (Method) call.method : null;
         Object owner = call.thisObject;
         Object[] args = call.args.clone();
-        Object author = Reflect.call(post, "getAuthor");
-        Object handle = author == null ? null : Reflect.call(author, "getUniqueId");
+        DownloadName.Info info = info(post, id);
         AtomicBoolean submitted = new AtomicBoolean();
         ACTIVE.add(key);
         try {
             DownloadSheet.show(activity, I18n.get(photo ? I18n.S.DL_TITLE_PHOTOS : I18n.S.DL_TITLE),
-                    handle == null ? null : "@" + handle, rows,
+                    info.author.isEmpty() ? null : "@" + info.author, rows,
                     which -> {
                         if (which < 0 || which >= jobs.size()) return;
                         List<DownloadModels.Item> job = jobs.get(which);
                         if (job == null) {
                             original(action, owner, args);
                         } else {
-                            submitted.set(download(activity, id, key, job));
+                            submitted.set(download(activity, info, key, job));
                         }
                     },
                     () -> { if (!submitted.get()) ACTIVE.remove(key); });
@@ -234,15 +233,14 @@ public final class DownloadsPlus {
         List<List<DownloadModels.Item>> jobs = new ArrayList<>();
         boolean photo = !DownloadModels.photoImages(post).isEmpty();
         if (!options(post, photo, rows, jobs)) return false;
-        Object author = Reflect.call(post, "getAuthor");
-        Object handle = author == null ? null : Reflect.call(author, "getUniqueId");
+        DownloadName.Info info = info(post, id);
         AtomicBoolean submitted = new AtomicBoolean();
         ACTIVE.add(id);
         try {
             DownloadSheet.show(activity, I18n.get(photo ? I18n.S.DL_TITLE_PHOTOS : I18n.S.DL_TITLE),
-                    handle == null ? null : "@" + handle, rows,
+                    info.author.isEmpty() ? null : "@" + info.author, rows,
                     which -> {
-                        if (which >= 0 && which < jobs.size()) submitted.set(download(activity, id, id, jobs.get(which)));
+                        if (which >= 0 && which < jobs.size()) submitted.set(download(activity, info, id, jobs.get(which)));
                     },
                     () -> {
                         if (!submitted.get()) ACTIVE.remove(id);
@@ -271,26 +269,50 @@ public final class DownloadsPlus {
 
     /** Saves media found elsewhere (comment stickers and photos) through the same queue. */
     static boolean save(Context context, String id, List<DownloadModels.Item> items) {
-        return !items.isEmpty() && download(context, id, "media:" + id, items);
+        return save(context, new DownloadName.Info(null, null, id, 0), items);
+    }
+
+    static boolean save(Context context, DownloadName.Info info, List<DownloadModels.Item> items) {
+        return !items.isEmpty() && download(context, info, "media:" + info.id, items);
+    }
+
+    static DownloadName.Info info(Object post, String id) {
+        Object author = Reflect.call(post, "getAuthor");
+        Object created = Reflect.call(post, "getCreateTime");
+        return new DownloadName.Info(text(Reflect.call(author, "getUniqueId")), text(Reflect.call(author, "getNickname")),
+                id, millis(created));
+    }
+
+    static String text(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
+    static long millis(Object created) {
+        if (!(created instanceof Number)) return 0;
+        long value = ((Number) created).longValue();
+        return value > 100_000_000_000L ? value : value * 1000L;
     }
 
     /** Returns false before consuming TikTok's action if the bounded job queue is full. */
-    private static boolean download(Context context, String id, String key, List<DownloadModels.Item> choices) {
+    private static boolean download(Context context, DownloadName.Info info, String key, List<DownloadModels.Item> choices) {
         Context app = context.getApplicationContext();
         if (app == null) return false;
         List<DownloadModels.Item> items = new ArrayList<>(choices);
-        String batch = Long.toString(System.currentTimeMillis()) + '_' + UUID.randomUUID().toString().substring(0, 8);
+        long now = System.currentTimeMillis();
+        String batch = Long.toString(now) + '_' + UUID.randomUUID().toString().substring(0, 8);
         try {
             WORKER.execute(Safe.run("downloads", () -> {
                 int saved = 0;
                 try {
-                    for (int i = 0; i < items.size(); i++) if (MediaDownload.save(app, items.get(i), id, batch, i + 1)) saved++;
+                    for (int i = 0; i < items.size(); i++) {
+                        if (MediaDownload.save(app, items.get(i), info, batch, i + 1, items.size(), now)) saved++;
+                    }
                 } catch (Throwable ignored) {
                 } finally {
                     ACTIVE.remove(key);
                     String message;
                     if (saved == items.size()) {
-                        message = I18n.get(I18n.S.DL_SAVED) + " " + MediaDownload.directory(items.get(0).kind) + "/TikTok";
+                        message = I18n.get(I18n.S.DL_SAVED) + " " + MediaDownload.target(items.get(0).kind, info, now).path;
                     } else if (saved == 0) {
                         message = I18n.get(I18n.S.DL_FAILED);
                     } else {

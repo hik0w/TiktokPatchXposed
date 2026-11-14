@@ -67,7 +67,9 @@ final class AvatarDownload {
         if (item == null) return false;
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         Object id = Reflect.call(person, "getUid");
-        DownloadsPlus.save(activity, "avatar_" + id, Collections.singletonList(item));
+        DownloadName.Info info = new DownloadName.Info(DownloadsPlus.text(Reflect.call(person, "getUniqueId")),
+                DownloadsPlus.text(Reflect.call(person, "getNickname")), "avatar_" + id, 0);
+        DownloadsPlus.save(activity, info, Collections.singletonList(item));
         return true;
     }
 

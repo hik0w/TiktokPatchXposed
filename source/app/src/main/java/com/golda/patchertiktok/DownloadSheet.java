@@ -38,6 +38,7 @@ final class DownloadSheet {
         final boolean best;
         /** A download arrow at the end; off for rows that are not downloads. */
         boolean arrow = true;
+        android.graphics.drawable.Drawable image;
 
         Row(String title, String detail, Glyph.Kind icon, int tile, boolean best) {
             this.title = title;
@@ -185,7 +186,7 @@ final class DownloadSheet {
         square.setCornerRadius(dp(10));
         tile.setBackground(square);
         tile.setScaleType(ImageView.ScaleType.CENTER);
-        tile.setImageDrawable(new Glyph(item.icon, 0xFFFFFFFF, dp(18)));
+        tile.setImageDrawable(item.image != null ? item.image : new Glyph(item.icon, 0xFFFFFFFF, dp(18)));
         LinearLayout.LayoutParams tileParams = new LinearLayout.LayoutParams(dp(34), dp(34));
         tileParams.rightMargin = dp(12);
         row.addView(tile, tileParams);
