@@ -33,8 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -45,12 +43,13 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Records a LIVE. The room on screen keeps its streams in a "stream_data" JSON; the newest one
- * TikTok's LIVE model hands to the player is kept in case the room can't be read. A REC button in
- * the LIVE room copies the chosen stream's FLV until it is tapped again, the LIVE ends or the room
- * is left, then saves it as MP4 in Movies/TikTok (the FLV stays if that fails). Nothing is sent to
- * TikTok: the stream is the one the player already pulls from TikTok's CDN. Needs Android 10 for
- * the Movies folder; recording stops early when the phone runs low on space.
+ * Records a LIVE. The room on screen (the one whose host is shown) keeps its streams in a
+ * "stream_data" JSON; the newest one TikTok's LIVE model hands to the player is kept in case the
+ * room can't be read. A REC button in the LIVE room copies the chosen stream's FLV until it is
+ * tapped again, the LIVE ends or the room is left, then saves it as MP4 in Movies/TikTok (the FLV
+ * stays if that fails). Nothing is sent to TikTok: the stream is the one the player already pulls
+ * from TikTok's CDN. Needs Android 10 for the Movies folder; recording stops early when the phone
+ * runs low on space.
  * Idea and first version by RSR1337 (PR #16).
  */
 final class LiveRecord {
@@ -77,6 +76,8 @@ final class LiveRecord {
 
     private static volatile String stream;
     private static volatile long streamAt;
+    /** Every LIVE room TikTok has made, weakly: the one on screen and the ones loaded around it. */
+    private static final java.util.Map<Object, Boolean> ROOMS = new java.util.WeakHashMap<>();
     private static volatile Recorder recorder;
     private static volatile WeakReference<TextView> button = new WeakReference<>(null);
     private static final Runnable TICK = new Runnable() {
@@ -109,6 +110,15 @@ final class LiveRecord {
             });
         }
         if (hooks == 0) RuntimeLog.log("LIVE record: stream model not found, reading rooms only");
+        Class<?> room = Hooks.findClass(ROOM_MODEL, loader);
+        int rooms = room == null ? 0 : Hooks.hookConstructors(room, new Hooks.Hook() {
+            @Override protected void after(Hooks.Call param) {
+                if (!Prefs.on(Prefs.LIVE_RECORD)) return;
+                synchronized (ROOMS) {
+                    ROOMS.put(param.thisObject, Boolean.TRUE);
+                }
+            }
+        });
         Hooks.findAndHook(Activity.class, "onResume", new Hooks.Hook() {
             @Override protected void after(Hooks.Call param) {
                 Activity activity = (Activity) param.thisObject;
@@ -121,7 +131,7 @@ final class LiveRecord {
                 if (active != null && active.owner.get() == param.thisObject) active.stop();
             }
         });
-        RuntimeLog.log("LIVE record: hooks=" + hooks);
+        RuntimeLog.log("LIVE record: hooks=" + hooks + " rooms=" + rooms);
     }
 
     /** Keeps the newest stream; the player reads it often, so an unchanged one costs a compare. */
@@ -283,6 +293,7 @@ final class LiveRecord {
         }
         List<LiveStreams.Option> fromRoom = choices(roomStream(activity));
         List<LiveStreams.Option> choices = fromRoom.isEmpty() ? choices(freshStream()) : fromRoom;
+        RuntimeLog.log("LIVE record: " + (fromRoom.isEmpty() ? "room on screen not found, newest stream" : "stream of the room on screen"));
         if (choices.isEmpty()) {
             toast(activity, I18n.get(I18n.S.LIVE_REC_NONE));
             return;
@@ -311,40 +322,64 @@ final class LiveRecord {
         return data == null ? new ArrayList<>() : LiveStreams.choices(options(data));
     }
 
+    /**
+     * The stream of the LIVE on screen. TikTok keeps the next and previous LIVEs loaded for
+     * swiping (#34), so the newest stream the player read may belong to a neighbour. Of the rooms
+     * TikTok has made, the one whose host's name is shown on screen right now is the one to record.
+     */
     static String roomStream(Activity activity) {
         try {
-            Object fragment = activity;
-            for (int depth = 0; depth < 4; depth++) {
-                Object next = Reflect.call(fragment, "getCurrentFragment");
-                if (next == null || next == fragment) break;
-                fragment = next;
+            List<String> shown = new ArrayList<>();
+            View decor = activity.getWindow() == null ? null : activity.getWindow().getDecorView();
+            if (decor != null) shownTexts(decor, shown);
+            Object[] rooms;
+            synchronized (ROOMS) {
+                rooms = ROOMS.keySet().toArray();
             }
-            Object room = fragment == activity ? null : room(fragment);
-            if (room == null) return null;
-            Object data = Reflect.call(room, "getMultiStreamData");
-            if (!(data instanceof String)) {
-                Object pull = Reflect.get(Reflect.get(Reflect.get(room, "streamUrl"), "liveCoreSDKData"), "pullData");
-                data = Reflect.get(pull, "streamData");
+            for (Object room : rooms) {
+                String host = host(room);
+                if (host == null || !shown.contains(host)) continue;
+                String data = streamOf(room);
+                if (data != null) return data;
             }
-            return data instanceof String && ((String) data).contains("flv") ? (String) data : null;
+            return null;
         } catch (Throwable error) {
             RuntimeLog.log("LIVE record: room stream unreadable: " + error);
             return null;
         }
     }
 
-    private static Object room(Object fragment) {
-        for (Class<?> type = fragment.getClass(); type != null && !type.getName().startsWith("android"); type = type.getSuperclass()) {
-            for (Field field : Reflect.fields(type)) {
-                if (Modifier.isStatic(field.getModifiers()) || !ROOM_MODEL.equals(field.getType().getName())) continue;
-                try {
-                    field.setAccessible(true);
-                    Object room = field.get(fragment);
-                    if (room != null) return room;
-                } catch (Throwable ignored) { }
+    /** The texts of every TextView that is at least partly on screen. */
+    private static void shownTexts(View view, List<String> out) {
+        if (!view.isShown()) return;
+        if (view instanceof TextView) {
+            CharSequence text = ((TextView) view).getText();
+            if (text != null && text.length() > 0 && view.getGlobalVisibleRect(new android.graphics.Rect())) {
+                out.add(text.toString().trim());
             }
         }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) shownTexts(group.getChildAt(i), out);
+        }
+    }
+
+    private static String host(Object room) {
+        Object owner = Reflect.call(room, "getOwner");
+        for (String getter : new String[]{"getNickName", "getNickname"}) {
+            Object name = Reflect.call(owner, getter);
+            if (name instanceof String && !((String) name).trim().isEmpty()) return ((String) name).trim();
+        }
         return null;
+    }
+
+    private static String streamOf(Object room) {
+        Object data = Reflect.call(room, "getMultiStreamData");
+        if (!(data instanceof String)) {
+            Object pull = Reflect.get(Reflect.get(Reflect.get(room, "streamUrl"), "liveCoreSDKData"), "pullData");
+            data = Reflect.get(pull, "streamData");
+        }
+        return data instanceof String && ((String) data).contains("flv") ? (String) data : null;
     }
 
     private static void copyLink(Activity activity, String url) {
