@@ -7,7 +7,7 @@ turns on features TikTok rolls out only to some people, and adds many small thin
 everywhere, your own color, font and AMOLED theme, hiding parts of the screen, country flags,
 invisible mode and auto streaks. All settings live right inside TikTok.
 
-Current version: **4.4.4**. Tested on **TikTok 47.5.3**, **47.4.3** and **47.1.4** (Google Play and universal APK),
+Current version: **4.5.0**. Tested on **TikTok 47.6.3**, **47.5.3**, **47.4.3** and **47.1.4** (Google Play and universal APK),
 **Android 16**. Most features find what they need in TikTok by themselves, so
 they survive TikTok updates.
 
@@ -86,6 +86,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
   comments header, even if TikTok never showed them to you.
 - **Auto-translate comments**: turns TikTok's translation on for all comments right away.
 - **Copy text only**, **author's country** (a flag next to the video date, in profiles and in comments), **@username of commenters**.
+- **Flag details**: tap the flag to see the account and video region, languages and tagged place.
 - **Comment reposts**; 🧪 **repost your own videos**.
 - 🧪 **Up to 9 photos in a comment**.
 
@@ -94,6 +95,7 @@ Features marked 🧪 work but are not fully tested. All new features are off by 
 - **All photos from a carousel**, **stickers and photos from comments**, **stickers from chats**.
 - **Save stories and highlights** (hold a story) and **profile photos** (hold the enlarged photo).
 - 🧪 **Record LIVEs**: a REC button in a LIVE records it in the quality you pick to Movies/TikTok (MP4), or copies the stream link. Android 10+.
+- **Save location and names**: where files go (by type, Download or DCIM) and a name template with author, date and quality.
 - 🧪 **Upload in HD**, as with TikTok's "Upload HD" switched on, and a 🧪 bitrate choice: 12, 20 or 30 Mbit/s.
 - 🧪 **Upload the original (up to 4K)**: an unedited video goes up as the file itself, without TikTok re-encoding it.
 - **Clean links** (no tracking), **links in your browser**, **screenshots everywhere**.
@@ -125,7 +127,7 @@ The module doesn't change the account's region or your IP address, so the result
 - 🧪 **No forced login**, 🧪 **no hashtag limit**, 🧪 **camera extras** (teleprompter, green screen).
 
 ### Settings screen
-Search across settings, how many features are on in each section, "Feature status" (what was found in your
+A "Main" tab with the features people use most, and "All" with the full list. Search across settings, how many features are on in each section, "Feature status" (what was found in your
 TikTok version, and why something was not). Under "More": export and import of settings as a `.json` file,
 reset all settings and a **bug report** (log, crashes, device; attach it to an issue). If TikTok closes right
 after starting three times in a row, the module runs one launch in **safe mode** so the report can be saved.
