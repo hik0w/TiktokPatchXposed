@@ -153,6 +153,29 @@ public class TombstoneTest {
         }
     }
 
+    @Test public void namesTheMemoryRegistersAndNearbyPointersPointInto() {
+        long dexData = 0x7000100000L, apk = 0x7200000000L;
+        byte[] dump = new byte[32];
+        java.nio.ByteBuffer.wrap(dump).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                .putLong(0, 0x1111).putLong(8, apk + 0x40).putLong(16, 0x2222).putLong(24, 0x3333);
+        Proto thread = new Proto().varint(1, 9).string(2, "Jit thread pool")
+                .message(3, new Proto().string(1, "x0").varint(2, 0x55))
+                .message(3, new Proto().string(1, "x1").varint(2, dexData + 0x80))
+                .message(4, frame(0x10, "art::mirror::DexCache::SetResolvedType", 408, "libart.so"))
+                .message(5, new Proto().string(1, "x1").string(2, "[anon:dalvik-DEX data]").varint(3, dexData + 0x78).bytes(4, dump));
+        byte[] data = new Proto().varint(6, 9)
+                .message(10, new Proto().varint(1, 11).string(2, "SIGSEGV").varint(8, 1).varint(9, 0x10))
+                .message(16, entry(9, thread))
+                .message(17, new Proto().varint(1, dexData).varint(2, dexData + 0x1000).varint(4, 1).string(7, "[anon:dalvik-DEX data]"))
+                .message(17, new Proto().varint(1, apk).varint(2, apk + 0x10000).varint(4, 1)
+                        .string(7, "/data/app/~~a==/com.zhiliaoapp.musically-b==/base.apk"))
+                .build();
+        String text = Tombstone.read(data, data.length);
+        assertTrue(text, text.contains("registers:\n  x1 -> r-- [anon:dalvik-DEX data] +0x0 (0x1000 bytes), at +0x80"));
+        assertFalse(text, text.contains("  x0 ->"));
+        assertTrue(text, text.contains("pointers near registers:\n  x1+0x0 -> r-- base.apk +0x0 (0x10000 bytes), at +0x40"));
+    }
+
     @Test public void rejectsData() {
         byte[] junk = {(byte) 0xff, (byte) 0xff, (byte) 0xff};
         assertNull(Tombstone.read(junk, junk.length));

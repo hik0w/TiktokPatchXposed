@@ -162,8 +162,8 @@ final class BugReport {
         try (java.io.InputStream in = exit.getTraceInputStream()) {
             if (in == null) return null;
             // A tombstone holds every thread and memory dumps, often a few megabytes; the crashing
-            // thread may be anywhere in it.
-            byte[] data = new byte[text ? TRACE_LIMIT : 8 * 1024 * 1024];
+            // thread may be anywhere in it, and the memory map comes after all the threads.
+            byte[] data = new byte[text ? TRACE_LIMIT : 16 * 1024 * 1024];
             int read = 0;
             for (int n; read < data.length && (n = in.read(data, read, data.length - read)) > 0; ) read += n;
             if (text) return new String(data, 0, read, StandardCharsets.UTF_8);
